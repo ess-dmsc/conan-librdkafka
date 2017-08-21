@@ -27,8 +27,6 @@ node('docker') {
             """
             sh "docker exec ${container_name} sh -c \"${package_script}\""
         }
-
-        sh "docker cp ${container_name}:/home/jenkins/${project} ./srcs"
     } finally {
         container.stop()
     }
