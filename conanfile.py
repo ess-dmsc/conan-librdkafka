@@ -36,8 +36,8 @@ class LibrdkafkaConan(ConanFile):
                   src="librdkafka-0.11.0/src")
         self.copy("rdkafkacpp.h", dst="include/librdkafka",
                   src="librdkafka-0.11.0/src-cpp")
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
+        self.copy("*.so*", dst="lib", keep_path=False)
+        self.copy("*.dylib*", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
         self.copy("*.pc", dst="lib/pkgconfig", keep_path=False)
 
