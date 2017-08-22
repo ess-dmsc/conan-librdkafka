@@ -23,7 +23,7 @@ node('docker') {
         stage('Package') {
             def package_script = """
                 cd ${project}
-                conan create librdkafka/testing
+                conan create ess-dmsc/testing
             """
             sh "docker exec ${container_name} sh -c \"${package_script}\""
         }
