@@ -49,25 +49,6 @@ class LibrdkafkaConan(ConanFile):
         self.copy("*.pc", dst="lib/pkgconfig", keep_path=False)
         if tools.os_info.is_macos:
             self.copy("*.dylib*", dst="lib", keep_path=False)
-            self._change_dylib_install_name()
 
     def package_info(self):
         self.cpp_info.libs = ["rdkafka", "rdkafka++"]
-
-    def _change_dylib_install_name(self):
-        """Remove absolute path from dynamic shared library install names."""
-        libs = os.path.join(self.package_folder, "lib", '*.dylib')
-        filenames = glob.glob(libs)
-
-        self.output.info("Removing absolute paths from dynamic libraries")
-        for filename in filenames:
-            cmd = (
-                "otool -D {0} "
-                "| tail -n 1 "
-                "| xargs basename "
-                "| xargs -J % -t "
-                "install_name_tool -id % {0}".format(filename)
-            )
-            os.system(cmd)
-
-        self.output.success("Removed absolute paths from dynamic libraries")
