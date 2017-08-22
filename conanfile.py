@@ -24,6 +24,7 @@ class LibrdkafkaConan(ConanFile):
 
     def build(self):
         with tools.chdir("./librdkafka-0.11.0"):
+            # Do not link using absolute rpath in macOS.
             tools.replace_in_file(
                 "mklove/modules/configure.lib",
                 " -Wl,-install_name,$(DESTDIR)$(libdir)/$(LIBFILENAME)",
