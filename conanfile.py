@@ -24,6 +24,11 @@ class LibrdkafkaConan(ConanFile):
 
     def build(self):
         with tools.chdir("./librdkafka-0.11.0"):
+            tools.replace_in_file(
+                "mklove/modules/configure.lib",
+                " -Wl,-install_name,$(DESTDIR)$(libdir)/$(LIBFILENAME)",
+                ""
+            )
             self.run(
                 "./configure"
                 " --prefix="
