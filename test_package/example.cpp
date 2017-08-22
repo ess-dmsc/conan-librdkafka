@@ -1,6 +1,6 @@
 #include <iostream>
-#include "librdkafka/rdkafka.h"
+#include "librdkafka/rdkafkacpp.h"
 
 int main() {
-    std::cout << "hello world\n";
+    std::cout << "librdkafka version " << RdKafka::version_str() << std::endl;
 }
