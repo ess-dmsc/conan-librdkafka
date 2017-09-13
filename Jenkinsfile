@@ -1,5 +1,5 @@
 def project = "conan-librdkafka"
-def centos = docker.image('essdmscdm/centos-build-node:0.7.0')
+def centos = docker.image('essdmscdm/centos-build-node:0.7.1')
 def container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
 def conan_remote = "ess-dmsc-local"
@@ -59,12 +59,10 @@ node('docker') {
             sh """docker exec ${container_name} sh -c \"
                 export http_proxy=''
                 export https_proxy=''
-                cd ${project}
-                # Get package name from conanfile.py.
-                pkg_name=\$(grep "name = " conanfile.py | awk '{print \$3}')
-                # Remove quotes from package name.
-                pkg_name=\$(echo \$pkg_name | sed -e "s/\\\"//g")
-                conan upload --all --remote ${conan_remote} '\$pkg_name/*'
+                upload_conan_package.sh ${project}/conanfile.py \
+                    ${conan_remote} \
+                    ${conan_user} \
+                    ${conan_pkg_channel}
             \""""
         }
     } finally {
