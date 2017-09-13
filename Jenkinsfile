@@ -60,10 +60,10 @@ node('docker') {
                 export http_proxy=''
                 export https_proxy=''
                 cd ${project}
-                \# Get package name from conanfile.py.
-                pkg_name=$(grep "name = " conanfile.py | awk '{print \$3}')
-                \# Remove quotes from package name.
-                pkg_name=$(echo \$pkg_name | sed -e "s/\\\"//g")
+                # Get package name from conanfile.py.
+                pkg_name=\$(grep "name = " conanfile.py | awk '{print \$3}')
+                # Remove quotes from package name.
+                pkg_name=\$(echo \$pkg_name | sed -e "s/\\\"//g")
                 conan upload --all --remote ${conan_remote} '\$pkg_name/*'
             \""""
         }
