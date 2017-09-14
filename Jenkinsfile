@@ -1,5 +1,5 @@
 def project = "conan-librdkafka"
-def centos = docker.image('essdmscdm/centos-build-node:0.7.3')
+def centos = docker.image('essdmscdm/centos-build-node:0.7.4')
 def container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
 def conan_remote = "ess-dmsc-local"
