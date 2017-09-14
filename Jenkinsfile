@@ -5,8 +5,8 @@ conan_user = "ess-dmsc"
 conan_pkg_channel = "testing"
 
 images = [
-    'centos': 'essdmscdm/centos-build-node:0.7.3',
-    'centos-gcc6': 'essdmscdm/centos-gcc6-build-node:0.1.0'
+    'centos': 'essdmscdm/centos-build-node:0.7.3'
+    // 'centos-gcc6': 'essdmscdm/centos-gcc6-build-node:0.1.0'
 ]
 
 commands = [
