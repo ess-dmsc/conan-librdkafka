@@ -25,7 +25,7 @@ def get_pipeline(image_key) {
             ")
 
             // Copy sources to container.
-            sh "docker cp ${project} ${container_name}:/home/jenkins/${env.JOB_BASE_NAME}"
+            sh "docker cp ${project} ${container_name}:/home/jenkins/${project}"
 
             stage("Conan setup (${image_key})") {
                 withCredentials([string(
@@ -77,7 +77,7 @@ node('docker') {
     // Delete workspace when build is done
     cleanWs()
 
-    dir("${env.JOB_BASE_NAME}") {
+    dir("${project}") {
         stage('Checkout') {
             scm_vars = checkout scm
         }
