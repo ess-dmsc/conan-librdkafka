@@ -6,8 +6,12 @@ conan_pkg_channel = "testing"
 
 images = [
     'centos': 'essdmscdm/centos-build-node:0.7.3',
-    'centos-gcc6': 'essdmscdm/centos-gcc6-build-node:0.1.0',
-    'fedora': 'essdmscdm/fedora-build-node:0.3.0'
+    'centos-gcc6': 'essdmscdm/centos-gcc6-build-node:0.1.0'
+]
+
+commands = [
+    'centos': 'sh',
+    'centos-gcc6': 'scl enable devtoolset-6 rh-python35 /bin/bash'
 ]
 
 base_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
@@ -32,7 +36,7 @@ def get_pipeline(image_key) {
                     credentialsId: 'local-conan-server-password',
                     variable: 'CONAN_PASSWORD'
                 )]) {
-                    sh """docker exec ${container_name} sh -c \"
+                    sh """docker exec ${container_name} ${commands[image_key]} \"
                         set +x
                         export http_proxy=''
                         export https_proxy=''
@@ -49,7 +53,7 @@ def get_pipeline(image_key) {
             }
 
             stage("Package (${image_key})") {
-                sh """docker exec ${container_name} sh -c \"
+                sh """docker exec ${container_name} ${commands[image_key]} \"
                     cd ${project}
                     conan create ${conan_user}/${conan_pkg_channel} \
                         --build=missing
@@ -57,7 +61,7 @@ def get_pipeline(image_key) {
             }
 
             stage("Upload (${image_key})") {
-                sh """docker exec ${container_name} sh -c \"
+                sh """docker exec ${container_name} ${commands[image_key]} \"
                     export http_proxy=''
                     export https_proxy=''
                     upload_conan_package.sh ${project}/conanfile.py \
