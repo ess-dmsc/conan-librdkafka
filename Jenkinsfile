@@ -1,5 +1,5 @@
 def project = "conan-librdkafka"
-def centos = docker.image('essdmscdm/centos-build-node:0.7.5')
+def centos = docker.image('essdmscdm/centos-build-node:0.7.6')
 def container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
 def conan_remote = "ess-dmsc-local"
@@ -13,6 +13,7 @@ node('docker') {
        --network=host \
        --env http_proxy=${env.http_proxy} \
        --env https_proxy=${env.https_proxy} \
+       --env no_proxy=${env.no_proxy} \
        --env local_conan_server=${env.local_conan_server}"
 
    try {
@@ -33,10 +34,7 @@ node('docker') {
             {
                 sh """docker exec ${container_name} sh -c \"
                     set +x
-                    export http_proxy=''
-                    export https_proxy=''
                     conan remote add \
-                        --insert 0 \
                         ${conan_remote} ${local_conan_server}
                     conan user \
                         --password '${CONAN_PASSWORD}' \
@@ -57,8 +55,6 @@ node('docker') {
 
         stage('Upload') {
             sh """docker exec ${container_name} sh -c \"
-                export http_proxy=''
-                export https_proxy=''
                 upload_conan_package.sh ${project}/conanfile.py \
                     ${conan_remote} \
                     ${conan_user} \
