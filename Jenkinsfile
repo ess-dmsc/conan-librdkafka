@@ -35,6 +35,7 @@ node('docker') {
                 sh """docker exec ${container_name} sh -c \"
                     set +x
                     conan remote add \
+                        --insert 0 \
                         ${conan_remote} ${local_conan_server}
                     conan user \
                         --password '${CONAN_PASSWORD}' \
