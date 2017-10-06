@@ -7,7 +7,7 @@ class LibrdkafkaConan(ConanFile):
     version = "0.11.0"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
-    settingss = "os", "compiler", "build_type", "arch"
+    settings = "os", "compiler", "build_type", "arch"
 
     def source(self):
         tools.download(
