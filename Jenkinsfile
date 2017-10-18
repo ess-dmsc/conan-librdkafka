@@ -64,7 +64,8 @@ def get_pipeline(image_key) {
                     conan create ${conan_user}/${conan_pkg_channel} \
                         --settings build_type=Release \
                         --options librdkafka:shared=False \
-                        --build=missing
+                        --build=missing \
+                    && \
                     conan create ${conan_user}/${conan_pkg_channel} \
                         --settings build_type=Release \
                         --options librdkafka:shared=True \
