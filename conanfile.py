@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
+from conans.util import files
 
 
 class LibrdkafkaConan(ConanFile):
@@ -8,6 +9,9 @@ class LibrdkafkaConan(ConanFile):
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
     settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False]}
+    build_requires = "cmake_installer/1.0@conan/stable"
+    default_options = "shared=False", "cmake_installer:version=3.9.0"
 
     def source(self):
         tools.download(
@@ -22,32 +26,36 @@ class LibrdkafkaConan(ConanFile):
         os.unlink("librdkafka-0.11.0.tar.gz")
 
     def build(self):
-        with tools.chdir("./librdkafka-0.11.0"):
-            # Do not link using absolute rpath in macOS.
-            tools.replace_in_file(
-                "mklove/modules/configure.lib",
-                " -Wl,-install_name,$(DESTDIR)$(libdir)/$(LIBFILENAME)",
-                ""
-            )
-            self.run(
-                "./configure"
-                " --prefix="
-                " --disable-lz4"
-                " --disable-ssl"
-                " --disable-sasl"
-            )
-            self.run("make")
+        files.mkdir("./librdkafka-0.11.0/build")
+        with tools.chdir("./librdkafka-0.11.0/build"):
+            cmake = CMake(self)
+
+            cmake.definitions["RDKAFKA_BUILD_EXAMPLES"] = "OFF"
+            cmake.definitions["RDKAFKA_BUILD_TESTS"] = "OFF"
+            cmake.definitions["WITH_LIBDL"] = "OFF"
+            cmake.definitions["WITH_PLUGINS"] = "OFF"
+            cmake.definitions["WITH_SASL"] = "OFF"
+            cmake.definitions["WITH_SSL"] = "OFF"
+            cmake.definitions["WITH_ZLIB"] = "OFF"
+
+            if self.settings.build_type == "Debug":
+                cmake.definitions["WITHOUT_OPTIMIZATION"] = "ON"
+            if self.options.shared:
+                cmake.definitions["BUILD_SHARED_LIBS"] = "TRUE"
+
+            cmake.configure(source_dir="..", build_dir=".")
+            cmake.build(build_dir=".")
 
     def package(self):
         self.copy("rdkafka.h", dst="include/librdkafka",
                   src="librdkafka-0.11.0/src")
         self.copy("rdkafkacpp.h", dst="include/librdkafka",
                   src="librdkafka-0.11.0/src-cpp")
-        self.copy("*.so*", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
-        self.copy("*.pc", dst="lib/pkgconfig", keep_path=False)
         if tools.os_info.is_macos:
             self.copy("*.dylib*", dst="lib", keep_path=False)
+        else:
+            self.copy("*.so*", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["rdkafka", "rdkafka++"]
