@@ -37,6 +37,8 @@ class LibrdkafkaConan(ConanFile):
             cmake.definitions["WITH_SASL"] = "OFF"
             cmake.definitions["WITH_SSL"] = "OFF"
             cmake.definitions["WITH_ZLIB"] = "OFF"
+            if tools.os_info.is_macos and self.options.shared:
+                cmake.definitions["CMAKE_SKIP_RPATH"] = "TRUE"
 
             if self.settings.build_type == "Debug":
                 cmake.definitions["WITHOUT_OPTIMIZATION"] = "ON"
