@@ -5,7 +5,7 @@ from conans.util import files
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    version = "0.11.0"
+    version = "0.11.0-dm1"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
     settings = "os", "compiler", "build_type", "arch"
@@ -38,12 +38,12 @@ class LibrdkafkaConan(ConanFile):
             cmake.definitions["WITH_SSL"] = "OFF"
             cmake.definitions["WITH_ZLIB"] = "OFF"
             if tools.os_info.is_macos and self.options.shared:
-                cmake.definitions["CMAKE_SKIP_RPATH"] = "TRUE"
+                cmake.definitions["CMAKE_MACOSX_RPATH"] = "ON"
 
             if self.settings.build_type == "Debug":
                 cmake.definitions["WITHOUT_OPTIMIZATION"] = "ON"
             if self.options.shared:
-                cmake.definitions["BUILD_SHARED_LIBS"] = "TRUE"
+                cmake.definitions["BUILD_SHARED_LIBS"] = "ON"
 
             cmake.configure(source_dir="..", build_dir=".")
             cmake.build(build_dir=".")
