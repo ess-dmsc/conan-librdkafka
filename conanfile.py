@@ -5,7 +5,7 @@ from conans.util import files
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    version = "0.11.1"
+    version = "0.11.1-dm1"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
     settings = "os", "compiler", "build_type", "arch"
@@ -48,7 +48,7 @@ class LibrdkafkaConan(ConanFile):
             cmake.configure(source_dir="..", build_dir=".")
             cmake.build(build_dir=".")
 
-            os.rename("../LICENSE", "LICENSE.librdkafka")
+            os.rename("../LICENSE", "../LICENSE.librdkafka")
 
     def package(self):
         self.copy("rdkafka.h", dst="include/librdkafka",
