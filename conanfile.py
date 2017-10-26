@@ -48,6 +48,8 @@ class LibrdkafkaConan(ConanFile):
             cmake.configure(source_dir="..", build_dir=".")
             cmake.build(build_dir=".")
 
+            os.rename("../LICENSE", "LICENSE.librdkafka")
+
     def package(self):
         self.copy("rdkafka.h", dst="include/librdkafka",
                   src="librdkafka-0.11.0/src")
@@ -58,6 +60,7 @@ class LibrdkafkaConan(ConanFile):
             self.copy("*.dylib*", dst="lib", keep_path=False)
         else:
             self.copy("*.so*", dst="lib", keep_path=False)
+        self.copy("LICENSE.*", src="librdkafka-0.11.0")
 
     def package_info(self):
         self.cpp_info.libs = ["rdkafka", "rdkafka++"]
