@@ -68,7 +68,7 @@ def get_pipeline(image_key) {
                     conan create ${conan_user}/${conan_pkg_channel} \
                         --settings librdkafka:build_type=Release \
                         --options librdkafka:shared=False \
-                        --build=missing \
+                        --build=missing
                 \""""
                 sh """docker exec ${container_name} ${custom_sh} -c \"
                     cd ${project}
