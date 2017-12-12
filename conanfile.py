@@ -5,29 +5,35 @@ from conans.util import files
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    version = "0.11.1-dm1"
+    sha256 = "2b96d7ed71470b0d0027bd9f0b6eb8fb68ed979f8092611c148771eb01abb72c"
+
+    version = "0.11.3"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
+    description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     build_requires = "cmake_installer/1.0@conan/stable"
     default_options = "shared=False", "cmake_installer:version=3.9.0"
 
+    folder_name = "{}-{}".format(name, version)
+    archive_name = "{}.tar.gz".format(folder_name)
+
     def source(self):
         tools.download(
-            "https://github.com/edenhill/librdkafka/archive/v0.11.1.tar.gz",
-            "librdkafka-0.11.1.tar.gz"
+            "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(self.version),
+            self.archive_name
         )
         tools.check_sha256(
-            "librdkafka-0.11.1.tar.gz",
-            "dd035d57c8f19b0b612dd6eefe6e5eebad76f506e302cccb7c2066f25a83585e"
+            self.archive_name,
+            self.sha256
         )
-        tools.unzip("librdkafka-0.11.1.tar.gz")
-        os.unlink("librdkafka-0.11.1.tar.gz")
+        tools.unzip(self.archive_name)
+        os.unlink(self.archive_name)
 
     def build(self):
-        files.mkdir("./librdkafka-0.11.1/build")
-        with tools.chdir("./librdkafka-0.11.1/build"):
+        files.mkdir("./{}/build".format(self.folder_name))
+        with tools.chdir("./{}/build".format(self.folder_name)):
             cmake = CMake(self)
 
             cmake.definitions["RDKAFKA_BUILD_EXAMPLES"] = "OFF"
@@ -52,15 +58,15 @@ class LibrdkafkaConan(ConanFile):
 
     def package(self):
         self.copy("rdkafka.h", dst="include/librdkafka",
-                  src="librdkafka-0.11.1/src")
+                  src="{}/src".format(self.folder_name))
         self.copy("rdkafkacpp.h", dst="include/librdkafka",
-                  src="librdkafka-0.11.1/src-cpp")
+                  src="{}/src-cpp".format(self.folder_name))
         self.copy("*.a", dst="lib", keep_path=False)
         if tools.os_info.is_macos:
             self.copy("*.dylib*", dst="lib", keep_path=False)
         else:
             self.copy("*.so*", dst="lib", keep_path=False)
-        self.copy("LICENSE.*", src="librdkafka-0.11.1")
+        self.copy("LICENSE.*", src=self.folder_name)
 
     def package_info(self):
         self.cpp_info.libs = ["rdkafka", "rdkafka++"]
