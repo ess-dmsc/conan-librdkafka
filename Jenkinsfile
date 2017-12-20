@@ -29,12 +29,12 @@ images = [
     'shared': true,
     'static': true
   ],
-  'ubuntu1604': [
+  /*'ubuntu1604': [
     'name': 'essdmscdm/ubuntu16.04-build-node:0.0.2',
     'sh': 'sh',
     'shared': false,
     'static': true
-  ],
+  ],*/
   'ubuntu1710': [
     'name': 'essdmscdm/ubuntu17.10-build-node:0.0.3',
     'sh': 'sh',
