@@ -29,6 +29,7 @@ images = [
     'name': 'essdmscdm/ubuntu17.10-build-node:0.0.3',
     'sh': 'sh'
   ]
+]
 
 base_container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
