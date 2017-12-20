@@ -32,8 +32,8 @@ images = [
   'ubuntu1604': [
     'name': 'essdmscdm/ubuntu16.04-build-node:0.0.2',
     'sh': 'sh',
-    'shared': true,
-    'static': false
+    'shared': false,
+    'static': true
   ],
   'ubuntu1710': [
     'name': 'essdmscdm/ubuntu17.10-build-node:0.0.3',
