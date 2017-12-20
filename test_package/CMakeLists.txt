@@ -9,6 +9,9 @@ find_package(LibRDKafka)
 
 find_package(Threads)
 
+message(INFO "libc++ =  ${LibRDKafka_LIBRARIES}")
+message(INFO "libc = ${LibRDKafka_C_LIBRARIES}")
+
 add_executable(example example.cpp)
 target_link_libraries(
   example
