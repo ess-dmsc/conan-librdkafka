@@ -10,6 +10,8 @@ find_package(LibRDKafka)
 find_package(Threads)
 
 add_executable(example example.cpp)
-target_link_libraries(example
-LibRDKafka
-${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(
+  example
+  ${LibRDKafka_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
+)
