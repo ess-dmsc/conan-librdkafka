@@ -7,27 +7,39 @@ conan_pkg_channel = "stable"
 images = [
   'centos': [
     'name': 'essdmscdm/centos-build-node:0.9.3',
-    'sh': 'sh'
+    'sh': 'sh',
+    'shared': true,
+    'static': true
   ],
   'centos-gcc6': [
     'name': 'essdmscdm/centos-gcc6-build-node:0.3.3',
-    'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
+    'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
+    'shared': true,
+    'static': true
   ],
   'fedora': [
     'name': 'essdmscdm/fedora-build-node:0.4.2',
-    'sh': 'sh'
+    'sh': 'sh',
+    'shared': true,
+    'static': true
   ],
   'debian': [
     'name': 'essdmscdm/debian-build-node:0.1.1',
-    'sh': 'sh'
+    'sh': 'sh',
+    'shared': true,
+    'static': true
   ],
   'ubuntu1604': [
     'name': 'essdmscdm/ubuntu16.04-build-node:0.0.2',
-    'sh': 'sh'
+    'sh': 'sh',
+    'shared': true,
+    'static': false
   ],
   'ubuntu1710': [
     'name': 'essdmscdm/ubuntu17.10-build-node:0.0.3',
-    'sh': 'sh'
+    'sh': 'sh',
+    'shared': false,
+    'static': true
   ]
 ]
 
@@ -81,6 +93,7 @@ def get_pipeline(image_key) {
         }  // stage
 
         stage("${image_key}: Package") {
+          if (images[image_key]['static']) {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             cd ${project}
             conan create ${conan_user}/${conan_pkg_channel} \
@@ -88,7 +101,9 @@ def get_pipeline(image_key) {
               --options librdkafka:shared=False \
               --build=missing
           \""""
+          }
 
+          if (images[image_key]['shared']) {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             cd ${project}
             conan create ${conan_user}/${conan_pkg_channel} \
@@ -96,6 +111,7 @@ def get_pipeline(image_key) {
               --options librdkafka:shared=True \
               --build=missing
           \""""
+          }
         }  // stage
 
         stage("${image_key}: Upload") {
