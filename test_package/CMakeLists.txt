@@ -13,5 +13,6 @@ add_executable(example example.cpp)
 target_link_libraries(
   example
   ${LibRDKafka_LIBRARIES}
+  4{LibRDKafka_C_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
 )
