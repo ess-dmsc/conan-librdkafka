@@ -7,14 +7,12 @@ class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
     sha256 = "2b96d7ed71470b0d0027bd9f0b6eb8fb68ed979f8092611c148771eb01abb72c"
 
-    version = "0.11.3"
+    version = "0.11.3-dm1"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
-    build_requires = "cmake_installer/1.0@conan/stable"
-    default_options = "shared=False", "cmake_installer:version=3.9.0"
 
     folder_name = "{}-{}".format(name, version)
     archive_name = "{}.tar.gz".format(folder_name)
