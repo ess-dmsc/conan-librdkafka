@@ -19,4 +19,9 @@ class LibrdkafkaTestConan(ConanFile):
 
     def test(self):
         os.chdir("bin")
+
+        if tools.os_info.is_linux:
+            ld_lib_path = os.environ.get("LD_LIBRARY_PATH", "")
+            os.environ["LD_LIBRARY_PATH"] = ld_lib_path + "."
+
         self.run(".%sexample" % os.sep)
