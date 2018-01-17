@@ -11,7 +11,7 @@ class LibrdkafkaTestConan(ConanFile):
 
         # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is
         # in "test_package".
-        cmake.configure(source_dir=self.conanfile_directory, build_dir="./")
+        cmake.configure(source_dir=self.source_folder, build_dir="./")
         cmake.build()
 
     def imports(self):
