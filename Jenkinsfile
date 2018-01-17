@@ -5,7 +5,6 @@ conan_user = "ess-dmsc"
 conan_pkg_channel = "stable"
 
 images = [
-<<<<<<< HEAD
   'centos7': [
     'name': 'essdmscdm/centos7-build-node:1.0.1',
     'sh': 'sh'
@@ -29,45 +28,6 @@ images = [
   'ubuntu1710': [
     'name': 'essdmscdm/ubuntu17.10-build-node:1.0.0',
     'sh': 'sh'
-=======
-  'centos': [
-    'name': 'essdmscdm/centos-build-node:0.9.4',
-    'sh': 'sh',
-    'shared': true,
-    'static': true
-  ],
-  'centos-gcc6': [
-    'name': 'essdmscdm/centos-gcc6-build-node:0.3.4',
-    'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
-    'shared': true,
-    'static': true
-  ],
-  'fedora': [
-    'name': 'essdmscdm/fedora-build-node:0.4.2',
-    'sh': 'sh',
-    'shared': true,
-    'static': true
-  ],
-  'debian': [
-    'name': 'essdmscdm/debian-build-node:0.1.1',
-    'sh': 'sh',
-    'shared': true,
-    'static': true
-  ],
-/*
-  'ubuntu1604': [
-    'name': 'essdmscdm/ubuntu16.04-build-node:0.0.2',
-    'sh': 'sh',
-    'shared': true,
-    'static': tre
-  ],
-*/
-  'ubuntu1710': [
-    'name': 'essdmscdm/ubuntu17.10-build-node:0.0.3',
-    'sh': 'sh',
-    'shared': false,
-    'static': true
->>>>>>> c7222392e0e6f6f6595002fa6075f33aedd135e8
   ]
 ]
 
@@ -158,28 +118,16 @@ def get_pipeline(image_key) {
   }  // return
 }  // def
 
-<<<<<<< HEAD
 def get_macos_pipeline() {
-=======
-def get_osx_pipeline() {
->>>>>>> c7222392e0e6f6f6595002fa6075f33aedd135e8
   return {
     node('macos') {
       cleanWs()
       dir("${project}") {
-<<<<<<< HEAD
         stage("macOS: Checkout") {
           checkout scm
         }  // stage
 
         stage("macOS: Conan setup") {
-=======
-        stage("OSX: Checkout") {
-          checkout scm
-        }  // stage
-
-        stage("OSX: Conan setup") {
->>>>>>> c7222392e0e6f6f6595002fa6075f33aedd135e8
           withCredentials([
             string(
               credentialsId: 'local-conan-server-password',
@@ -187,7 +135,6 @@ def get_osx_pipeline() {
             )
           ]) {
             sh "conan user \
-<<<<<<< HEAD
               --password '${CONAN_PASSWORD}' \
               --remote ${conan_remote} \
               ${conan_user} \
@@ -214,33 +161,6 @@ def get_osx_pipeline() {
             ${conan_pkg_channel}"
         }  // stage
       }  // dir
-=======
-                --password '${CONAN_PASSWORD}' \
-                --remote ${conan_remote} \
-                ${conan_user} \
-                > /dev/null"
-          }  // withCredentials
-        }  // stage
-
-        stage("OSX: Package") {
-          sh "conan create ${conan_user}/${conan_pkg_channel} \
-              --settings librdkafka:build_type=Release \
-              --options librdkafka:shared=False \
-              --build=missing && \
-            conan create ${conan_user}/${conan_pkg_channel} \
-              --settings librdkafka:build_type=Release \
-              --options librdkafka:shared=True \
-              --build=missing"
-        }  // stage
-
-        stage("OSX: Upload") {
-          sh "upload_conan_package.sh conanfile.py \
-                ${conan_remote} \
-                ${conan_user} \
-                ${conan_pkg_channel}"
-        }
-      }
->>>>>>> c7222392e0e6f6f6595002fa6075f33aedd135e8
     }  // node
   }  // return
 }  // def
@@ -253,12 +173,7 @@ node {
     def image_key = x
     builders[image_key] = get_pipeline(image_key)
   }
-<<<<<<< HEAD
   builders['macOS'] = get_macos_pipeline()
-=======
-  builders['MacOSX'] = get_osx_pipeline()
-
->>>>>>> c7222392e0e6f6f6595002fa6075f33aedd135e8
   parallel builders
 
   // Delete workspace when build is done.
