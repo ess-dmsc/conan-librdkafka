@@ -13,6 +13,7 @@ class LibrdkafkaConan(ConanFile):
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
+    default_options = "shared=False"
 
     folder_name = "{}-{}".format(name, version)
     archive_name = "{}.tar.gz".format(folder_name)
