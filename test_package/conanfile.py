@@ -16,6 +16,7 @@ class LibrdkafkaTestConan(ConanFile):
 
     def imports(self):
         self.copy("*.dylib*", dst="bin", src="lib")
+        self.copy("*.so*", dst="bin", src="lib")
 
     def test(self):
         os.chdir("bin")
