@@ -81,7 +81,6 @@ def get_pipeline(image_key) {
         }  // stage
 
         stage("${image_key}: Package") {
-          if (images[image_key]['static']) {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             cd ${project}
             conan create . ${conan_user}/${conan_pkg_channel} \
@@ -89,9 +88,7 @@ def get_pipeline(image_key) {
               --options librdkafka:shared=False \
               --build=outdated
           \""""
-          }
 
-          if (images[image_key]['shared']) {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             cd ${project}
             conan create . ${conan_user}/${conan_pkg_channel} \
@@ -99,7 +96,6 @@ def get_pipeline(image_key) {
               --options librdkafka:shared=True \
               --build=outdated
           \""""
-          }
         }  // stage
 
         stage("${image_key}: Upload") {
