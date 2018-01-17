@@ -7,6 +7,7 @@ class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
     sha256 = "2b96d7ed71470b0d0027bd9f0b6eb8fb68ed979f8092611c148771eb01abb72c"
 
+    src_version = "0.11.3"
     version = "0.11.3-dm1"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
@@ -15,12 +16,14 @@ class LibrdkafkaConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = "shared=False"
 
-    folder_name = "{}-{}".format(name, version)
+    folder_name = "{}-{}".format(name, src_version)
     archive_name = "{}.tar.gz".format(folder_name)
 
     def source(self):
         tools.download(
-            "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(self.version),
+            "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
+                self.src_version
+            ),
             self.archive_name
         )
         tools.check_sha256(
