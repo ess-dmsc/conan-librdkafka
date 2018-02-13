@@ -8,11 +8,12 @@ class LibrdkafkaConan(ConanFile):
     sha256 = "2b96d7ed71470b0d0027bd9f0b6eb8fb68ed979f8092611c148771eb01abb72c"
 
     src_version = "0.11.3"
-    version = "0.11.3-dm1"
+    version = "0.11.3-dm2"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
+    build_requires = "cmake_installer/3.10.0@conan/stable"
     options = {"shared": [True, False]}
     default_options = "shared=False"
 
