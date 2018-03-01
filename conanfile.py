@@ -42,7 +42,7 @@ class LibrdkafkaConan(ConanFile):
         if tools.os_info.is_windows:
             # Download patch - will be unneccessary for librdkafka version greater than 0.11.3
             tools.download("{}{}".format(self.win32_patch_path, self.win32_patch_name),
-                           "{}{}".format(folder_name, self.win32_patch_name)
+                           "{}{}".format(folder_name, self.win32_patch_name))
 
     def build(self):
         files.mkdir("./{}/build".format(self.folder_name))
