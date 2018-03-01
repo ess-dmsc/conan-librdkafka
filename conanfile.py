@@ -40,7 +40,7 @@ class LibrdkafkaConan(ConanFile):
             # Apply cmake patch - will be unneccessary for librdkafka version greater than 0.11.3
             tools.download("{}{}".format(self.win32_patch_path, self.win32_patch_name),
                            self.win32_patch_name)
-            tools.patch(patch_file=self.win32_patch_name)
+            tools.patch(base_path=".", patch_file=self.win32_patch_name)
 
     def build(self):
         files.mkdir("./{}/build".format(self.folder_name))
