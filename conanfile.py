@@ -11,6 +11,8 @@ class LibrdkafkaConan(ConanFile):
     version = "0.11.3-dm2"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
+    win32_patch_path = "https://patch-diff.githubusercontent.com/raw/edenhill/librdkafka/pull/"
+    win32_patch_name = "1638.patch"
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
     build_requires = "cmake_installer/3.10.0@conan/stable"
@@ -33,6 +35,11 @@ class LibrdkafkaConan(ConanFile):
         )
         tools.unzip(self.archive_name)
         os.unlink(self.archive_name)
+        
+        if tools.os_info.is_windows:
+            # Apply cmake patch - will be unneccessary for librdkafka version greater than 0.11.3
+            tools.download(self.win32_patch_path + self.win32_patch_name)
+            tools.patch(patch_file=self.win32_patch_name)
 
     def build(self):
         files.mkdir("./{}/build".format(self.folder_name))
@@ -53,6 +60,10 @@ class LibrdkafkaConan(ConanFile):
                 cmake.definitions["WITHOUT_OPTIMIZATION"] = "ON"
             if self.options.shared:
                 cmake.definitions["BUILD_SHARED_LIBS"] = "ON"
+                
+            if tools.os_info.is_window:
+                # Enables overridding of default window build settings
+                cmake.definitions["WITHOUT_WIN32_CONFIG"] = "ON"
 
             cmake.configure(source_dir="..", build_dir=".")
             cmake.build(build_dir=".")
@@ -64,9 +75,16 @@ class LibrdkafkaConan(ConanFile):
                   src="{}/src".format(self.folder_name))
         self.copy("rdkafkacpp.h", dst="include/librdkafka",
                   src="{}/src-cpp".format(self.folder_name))
-        self.copy("*.a", dst="lib", keep_path=False)
+        
+        if tools.os_info.is_windows:
+            self.copy("*.dll", dst="bin", keep_path=False)
+        else:
+            self.copy("*.a", dst="lib", keep_path=False)
+            
         if tools.os_info.is_macos:
             self.copy("*.dylib*", dst="lib", keep_path=False)
+        elif tools.os_info.is_windows:
+            self.copy("*.lib", dst="lib", keep_path=False)
         else:
             self.copy("*.so*", dst="lib", keep_path=False)
         self.copy("LICENSE.*", src=self.folder_name)
