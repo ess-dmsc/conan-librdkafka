@@ -43,6 +43,9 @@ class LibrdkafkaConan(ConanFile):
             # Download patch - will be unneccessary for librdkafka version greater than 0.11.3
             tools.download("{}{}".format(self.win32_patch_path, self.win32_patch_name),
                            self.win32_patch_name)
+            # Apply patch
+            tools.patch(base_path="..\\",
+                        patch_file="..\\..\\{}".format(self.win32_patch_name))
 
     def build(self):
         files.mkdir("./{}/build".format(self.folder_name))
@@ -65,9 +68,6 @@ class LibrdkafkaConan(ConanFile):
                 cmake.definitions["BUILD_SHARED_LIBS"] = "ON"
                 
             if tools.os_info.is_windows:
-                # Apply patch - will be unneccessary for librdkafka version greater than 0.11.3
-                tools.patch(base_file="..\\",
-                            patch_file="..\\..\\{}".format(self.win32_patch_name))
                 # Enables overridding of default window build settings
                 cmake.definitions["WITHOUT_WIN32_CONFIG"] = "ON"
 
