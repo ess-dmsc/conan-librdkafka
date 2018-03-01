@@ -44,8 +44,7 @@ class LibrdkafkaConan(ConanFile):
             tools.download("{}{}".format(self.win32_patch_path, self.win32_patch_name),
                            self.win32_patch_name)
             # Apply patch
-            tools.patch(base_path="..\\",
-                        patch_file="..\\..\\{}".format(self.win32_patch_name))
+            tools.patch(base_path=self.folder_name, patch_file=self.win32_patch_name)
 
     def build(self):
         files.mkdir("./{}/build".format(self.folder_name))
