@@ -65,7 +65,7 @@ class LibrdkafkaConan(ConanFile):
             if self.options.shared:
                 cmake.definitions["BUILD_SHARED_LIBS"] = "ON"
                 
-            if tools.os_info.is_window:
+            if tools.os_info.is_windows:
                 # Enables overridding of default window build settings
                 cmake.definitions["WITHOUT_WIN32_CONFIG"] = "ON"
 
