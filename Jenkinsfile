@@ -160,16 +160,65 @@ def get_macos_pipeline() {
     }  // node
   }  // return
 }  // def
+                                  
+def get_win10_pipeline() {
+  return {
+    node('windows10') {
+      cleanWs()
+      dir("${project}") {
+        stage("win10: Checkout") {
+          checkout scm
+        }  // stage
+
+        stage("win10: Conan setup") {
+          withCredentials([
+            string(
+              credentialsId: 'local-conan-server-password',
+              variable: 'CONAN_PASSWORD'
+            )
+          ]) {
+            bat """C:\\Users\\dmgroup\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\conan.exe user \
+              --password ${CONAN_PASSWORD} \
+              --remote ${conan_remote} \
+              ${conan_user}"""
+          }  // withCredentials
+        }  // stage
+
+        stage("win10: Package") {
+          bat """C:\\Users\\dmgroup\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\conan.exe \
+            create . ${conan_user}/${conan_pkg_channel} \
+            --settings librdkafka:build_type=Release \
+            --options librdkafka:shared=False \
+            --build=outdated"""
+
+          bat """C:\\Users\\dmgroup\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\conan.exe
+            create . ${conan_user}/${conan_pkg_channel} \
+            --settings librdkafka:build_type=Release \
+            --options librdkafka:shared=True \
+            --build=outdated"""
+        }  // stage
+
+        stage("win10: Upload") {
+          //sh "upload_conan_package.sh conanfile.py \
+          //  ${conan_remote} \
+           // ${conan_user} \
+           // ${conan_pkg_channel}"
+        }  // stage
+      }  // dir
+    }  // node
+  }  // return
+}  // def
 
 node {
   checkout scm
 
   def builders = [:]
-  for (x in images.keySet()) {
-    def image_key = x
-    builders[image_key] = get_pipeline(image_key)
-  }
-  builders['macOS'] = get_macos_pipeline()
+  //for (x in images.keySet()) {
+  //  def image_key = x
+  //  builders[image_key] = get_pipeline(image_key)
+  //}
+  //builders['macOS'] = get_macos_pipeline()
+  builders['windows10'] = get_win10_pipeline()
   parallel builders
 
   // Delete workspace when build is done.
