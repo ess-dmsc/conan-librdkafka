@@ -13,10 +13,6 @@ class LibrdkafkaTestConan(ConanFile):
     def build(self):
         cmake = CMake(self)
 
-        if tools.os_info.is_windows:
-            # Enables overridding of default window build settings
-            cmake.definitions["WITHOUT_WIN32_CONFIG"] = "ON"
-
         # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is
         # in "test_package".
         cmake.configure(source_dir=self.source_folder, build_dir="./")
