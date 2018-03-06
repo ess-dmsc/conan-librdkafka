@@ -11,6 +11,8 @@ class LibrdkafkaConan(ConanFile):
     version = "0.11.3-dm2"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
+    win32_patch_path = "https://raw.githubusercontent.com/mattclarke/librdkafka_win32_patch/master/"
+    win32_patch_name = "win32.patch"
     win32_sha = "6eeb23b13726d371b737bb39b8d667d36b8793b5"
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
@@ -48,6 +50,13 @@ class LibrdkafkaConan(ConanFile):
             )
         tools.unzip(self.archive_name)
         os.unlink(self.archive_name)
+        
+        if tools.os_info.is_windows:
+            # Download patch
+            tools.download("{}{}".format(self.win32_patch_path, self.win32_patch_name),
+                           self.win32_patch_name)
+            # Apply patch
+            tools.patch(base_path=self.folder_name, patch_file=self.win32_patch_name)
 
     def build(self):
         files.mkdir("./{}/build".format(self.folder_name))
