@@ -11,8 +11,7 @@ class LibrdkafkaConan(ConanFile):
     version = "0.11.3-dm2"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
-    win32_patch_path = "https://raw.githubusercontent.com/mattclarke/librdkafka_win32_patch/master/"
-    win32_patch_name = "win32.patch"
+    win32_sha = "6eeb23b13726d371b737bb39b8d667d36b8793b5"
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
     build_requires = "cmake_installer/3.10.0@conan/stable"
@@ -26,25 +25,28 @@ class LibrdkafkaConan(ConanFile):
     short_paths=True
 
     def source(self):
-        tools.download(
-            "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
-                self.src_version
-            ),
-            self.archive_name
-        )
-        tools.check_sha256(
-            self.archive_name,
-            self.sha256
-        )
+        if tools.os_info.is_windows:
+            # For windows we use an RC of 0.11.4 as it has cmake fixes.
+            # Once we move to 0.11.4+ this can be removed.
+            tools.download(
+                "https://github.com/edenhill/librdkafka/archive/{}.tar.gz".format(
+                    self.win32_sha
+                ),
+                self.archive_name
+            )
+        else: 
+            tools.download(
+                "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
+                    self.src_version
+                ),
+                self.archive_name
+            )
+            tools.check_sha256(
+                self.archive_name,
+                self.sha256
+            )
         tools.unzip(self.archive_name)
         os.unlink(self.archive_name)
-        
-        if tools.os_info.is_windows:
-            # Download patch - will be unneccessary for librdkafka version greater than 0.11.3
-            tools.download("{}{}".format(self.win32_patch_path, self.win32_patch_name),
-                           self.win32_patch_name)
-            # Apply patch
-            tools.patch(base_path=self.folder_name, patch_file=self.win32_patch_name)
 
     def build(self):
         files.mkdir("./{}/build".format(self.folder_name))
