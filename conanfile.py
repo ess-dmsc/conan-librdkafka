@@ -34,7 +34,7 @@ class LibrdkafkaConan(ConanFile):
                 ),
                 self.archive_name
             )
-            self.folder_name = "librdkafka-{}".format(self.win_sha)
+            self.folder_name = "librdkafka-{}".format(self.win32_sha)
         else: 
             tools.download(
                 "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
