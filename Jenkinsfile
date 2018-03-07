@@ -2,7 +2,7 @@ project = "conan-librdkafka"
 
 conan_remote = "ess-dmsc-local"
 conan_user = "ess-dmsc"
-conan_pkg_channel = "stable"
+conan_pkg_channel = "testing"
 
 images = [
   'centos7': [
@@ -160,7 +160,7 @@ def get_macos_pipeline() {
     }  // node
   }  // return
 }  // def
-                                  
+
 def get_win10_pipeline() {
   return {
     node('windows10') {
