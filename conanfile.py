@@ -31,6 +31,22 @@ class LibrdkafkaConan(ConanFile):
         if self.options.with_openssl:
             self.requires('OpenSSL/1.1.0g@conan/stable')
 
+    def configure(self):
+        # Remove these options on Windows because they require
+        # UNIX/BSD-specific header files and functions
+        if self.settings.os == 'Windows':
+            if self.options.build_examples:
+                self.output.warn('Ignoring build_examples option on Windows')
+                self.options.build_examples = False
+            #self.options.remove("build_examples")
+            #del self.options.build_examples
+            
+            if self.options.build_tests:
+                self.output.warn('Ignoring build_tests option on Windows')
+                self.options.build_tests = False
+            #self.options.remove("build_tests")
+            #del self.options.build_tests
+
     def source(self):
         tools.download(
             "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
@@ -46,6 +62,7 @@ class LibrdkafkaConan(ConanFile):
         os.unlink(self.archive_name)
 
         # put conan inclusion into CMakeLists.txt file or fail (strict=True)
+        self.output.info('Patching CMakeLists.txt')
         tools.replace_in_file(os.sep.join([self.folder_name, "CMakeLists.txt"]), "project(RdKafka)",
         '''project(RdKafka)
            include(${CMAKE_BINARY_DIR}/../../conanbuildinfo.cmake)
