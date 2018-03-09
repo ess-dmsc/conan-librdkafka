@@ -11,7 +11,7 @@ librdkafka is a C and C++ library for Apache Kafka clients
 enables the build to compile against Zlib 1.2.11 (provided by the conan community)
 
 * -o librdkafka:with_ssl=False or True
-enables the build to compile against OpenSSL 1.0.2g (provided by the conan community)
+enables the build to compile against OpenSSL 1.1.0g (provided by the conan community)
 
 * -o librdkafka:build_examples=False or True 
 builds librdkafka's own example programs
