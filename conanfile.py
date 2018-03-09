@@ -117,7 +117,7 @@ endif(MSVC)''' % (exe_name, exe_name))
                 'target_link_libraries(rdkafka PUBLIC OpenSSL::SSL OpenSSL::Crypto)',
                 'target_link_libraries(rdkafka PUBLIC OpenSSL::SSL OpenSSL::Crypto crypt32)')
 
-        # librdkafka never defined the export macro to export symbols on Windows
+        # librdkafka inconsistently defines its exports definition, so this defines it according to rdkafkacpp.h
         self.output.info('Patching src-cpp/CMakeLists.txt file')
         tools.replace_in_file(os.sep.join([self.folder_name, 'src-cpp', 'CMakeLists.txt']),
             'add_library(',
