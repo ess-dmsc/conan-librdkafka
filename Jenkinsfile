@@ -196,6 +196,7 @@ def get_win10_pipeline() {
             create . ${conan_user}/${conan_pkg_channel} \
             --settings librdkafka:build_type=Release \
             --options librdkafka:shared=True \
+            --keep-build \
             --build=outdated"""
         }  // stage
 
