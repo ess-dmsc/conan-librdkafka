@@ -164,6 +164,7 @@ def get_macos_pipeline() {
 def get_win10_pipeline() {
   return {
     node('windows10') {
+      customWorkspace '/conan-librdkafka-build'
       cleanWs()
       dir("${project}") {
         stage("win10: Checkout") {
