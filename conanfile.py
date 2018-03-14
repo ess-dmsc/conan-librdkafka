@@ -36,7 +36,7 @@ class LibrdkafkaConan(ConanFile):
                 ),
                 self.archive_name
             )
-            self.folder_name = "librdkafka-{}".format(self.win32_sha[:6])
+            self.folder_name = "librdkafka-{}".format(self.win32_sha)
         else:
             tools.download(
                 "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
@@ -61,7 +61,7 @@ class LibrdkafkaConan(ConanFile):
     def build(self):
         if tools.os_info.is_windows:
             # Useful for debugging purposes, can be removed after moving to 0.11.4
-            self.folder_name = "librdkafka-{}".format(self.win32_sha[:6])
+            self.folder_name = "librdkafka-{}".format(self.win32_sha)
         
         files.mkdir("./{}/build".format(self.folder_name))
         with tools.chdir("./{}/build".format(self.folder_name)):
