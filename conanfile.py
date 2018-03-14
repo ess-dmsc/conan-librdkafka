@@ -59,6 +59,10 @@ class LibrdkafkaConan(ConanFile):
             tools.patch(base_path=self.folder_name, patch_file=self.win32_patch_name)
 
     def build(self):
+        if tools.os_info.is_windows:
+            # Useful for debugging purposes, can be removed after moving to 0.11.4
+            self.folder_name = "librdkafka-{}".format(self.win32_sha)
+        
         files.mkdir("./{}/build".format(self.folder_name))
         with tools.chdir("./{}/build".format(self.folder_name)):
             cmake = CMake(self)
