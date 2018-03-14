@@ -193,7 +193,7 @@ def get_win10_pipeline() {
           //  --build=outdated"""
 
           bat """C:\\Users\\dmgroup\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\conan.exe \
-            create --keep-build . ${conan_user}/${conan_pkg_channel} \
+            create . ${conan_user}/${conan_pkg_channel} \
             --settings librdkafka:build_type=Release \
             --options librdkafka:shared=True \
             --build=outdated"""
