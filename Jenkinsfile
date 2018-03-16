@@ -139,10 +139,10 @@ def get_macos_pipeline() {
         }  // stage
 
         stage("macOS: Package") {
-          sh "conan create . ${conan_user}/${conan_pkg_channel} \
-            --settings librdkafka:build_type=Release \
-            --options librdkafka:shared=False \
-            --build=outdated"
+          //sh "conan create . ${conan_user}/${conan_pkg_channel} \
+          //  --settings librdkafka:build_type=Release \
+          //  --options librdkafka:shared=False \
+          //  --build=outdated"
 
           sh "conan create . ${conan_user}/${conan_pkg_channel} \
             --settings librdkafka:build_type=Release \
