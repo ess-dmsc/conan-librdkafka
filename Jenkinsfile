@@ -187,11 +187,11 @@ def get_win10_pipeline() {
         }  // stage
 
         stage("win10: Package") {
-          //bat """C:\\Users\\dmgroup\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\conan.exe \
-          //  create . ${conan_user}/${conan_pkg_channel} \
-          //  --settings librdkafka:build_type=Release \
-          //  --options librdkafka:shared=False \
-          //  --build=outdated"""
+          bat """C:\\Users\\dmgroup\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\conan.exe \
+            create . ${conan_user}/${conan_pkg_channel} \
+            --settings librdkafka:build_type=Release \
+            --options librdkafka:shared=False \
+            --build=outdated"""
 
           bat """C:\\Users\\dmgroup\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\conan.exe \
             create . ${conan_user}/${conan_pkg_channel} \
