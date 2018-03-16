@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, RunEnvironment
 import os
 
 
@@ -24,5 +24,10 @@ class LibrdkafkaTestConan(ConanFile):
         if tools.os_info.is_linux:
             ld_lib_path = os.environ.get("LD_LIBRARY_PATH", "")
             os.environ["LD_LIBRARY_PATH"] = ld_lib_path + "."
+        if tools.os_infor.is_windows:
+            env_build = RunEnvironment(self)
+            with tools.environment_append(env_build.vars):
+                self.run(".%sexample" % os.sep)
+                return
 
         self.run(".%sexample" % os.sep)
