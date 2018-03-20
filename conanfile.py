@@ -47,6 +47,7 @@ class LibrdkafkaConan(ConanFile):
             #self.options.remove("build_tests")
             #del self.options.build_tests
 
+
     def source(self):
         tools.download(
             "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
@@ -61,6 +62,8 @@ class LibrdkafkaConan(ConanFile):
         tools.unzip(self.archive_name)
         os.unlink(self.archive_name)
 
+
+    def build(self):
         # put conan inclusion into CMakeLists.txt file or fail (strict=True)
         self.output.info('Patching CMakeLists.txt')
         tools.replace_in_file(os.sep.join([self.folder_name, "CMakeLists.txt"]), "project(RdKafka)",
@@ -144,7 +147,6 @@ endif(MSVC)''' % (exe_name, exe_name))
             '''
         )
 
-    def build(self):
         files.mkdir("./{}/build".format(self.folder_name))
         with tools.chdir("./{}/build".format(self.folder_name)):
             cmake = CMake(self)
@@ -183,6 +185,13 @@ endif(MSVC)''' % (exe_name, exe_name))
         self.copy("*.dll", src=os.sep.join([self.folder_name, 'build', 'bin' ]), dst="bin", keep_path=False)
         self.copy("*.ilk", src=os.sep.join([self.folder_name, 'build', 'lib' ]), dst="bin", keep_path=False)
         self.copy("*.pdb", src=os.sep.join([self.folder_name, 'build', 'bin' ]), dst="bin", keep_path=False)
+
+        # copy example executables (if they exist) with somewhat restrictive patterns
+        for example_bin in ['kafkatest_verifiable_client*', 'rdkafka_consumer_example*', \
+                            'rdkafka_example*', 'rdkafka_performance*', 'rdkafka_simple_producer*', \
+                            'rdkafka_test*']:
+
+            self.copy(example_bin, src=os.sep.join([self.folder_name, 'build', 'bin' ]), dst="bin", keep_path=False)
 
         # Copy Linux/Mac files
         self.copy("*.a", dst="lib", keep_path=False)
