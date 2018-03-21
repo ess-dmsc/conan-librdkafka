@@ -51,8 +51,12 @@ class LibrdkafkaConan(ConanFile):
         os.unlink(self.archive_name)
 
         if tools.os_info.is_windows:
+            shutil.copyfile(
+                os.path.join(self.win32_patch_name),
+                os.path.join(self.folder_name, self.win32_patch_name)
+            )
             # Apply patch
-            tools.patch(base_path=self.folder_name, patch_file='../{}'.format(self.win32_patch_name))
+            tools.patch(base_path=self.folder_name, patch_file=self.win32_patch_name)
 
     def build(self):
         if tools.os_info.is_windows:
