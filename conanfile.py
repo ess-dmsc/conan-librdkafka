@@ -19,6 +19,7 @@ class LibrdkafkaConan(ConanFile):
     build_requires = "cmake_installer/3.10.0@conan/stable"
     options = {"shared": [True, False]}
     default_options = "shared=False"
+    exports = "files/*"
 
     folder_name = "{}-{}".format(name, src_version)
     archive_name = "{}.tar.gz".format(folder_name)
@@ -51,18 +52,12 @@ class LibrdkafkaConan(ConanFile):
         tools.unzip(self.archive_name)
         os.unlink(self.archive_name)
 
-        if tools.os_info.is_windows:
-            shutil.copyfile(
-                os.path.join(self.win32_patch_name),
-                os.path.join(self.folder_name, self.win32_patch_name)
-            )
-            # Apply patch
-            tools.patch(base_path=self.folder_name, patch_file=self.win32_patch_name)
-
     def build(self):
         if tools.os_info.is_windows:
-            # Useful for debugging purposes, can be removed after moving to 0.11.4
+            # Can be removed after moving to 0.11.4
             self.folder_name = "librdkafka-{}".format(self.win32_sha)
+            patch = os.path.join(self.source_folder, "files", self.win32_patch_name)
+            tools.patch(base_path=self.folder_name, patch_file=patch)
         
         files.mkdir("./{}/build".format(self.folder_name))
         with tools.chdir("./{}/build".format(self.folder_name)):
