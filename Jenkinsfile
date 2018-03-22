@@ -165,7 +165,7 @@ def get_win10_pipeline() {
   return {
     node('windows10') {
       // Use custom location to avoid Win32 path length issues
-      ws('c:\\jenkins\\conan-librdkafka-build\\') {
+      ws('c:\\jenkins\\') {
       cleanWs()
       dir("${project}") {
         stage("win10: Checkout") {
