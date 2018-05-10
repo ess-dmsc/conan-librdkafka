@@ -16,11 +16,12 @@ class LibrdkafkaConan(ConanFile):
     generators = "cmake"
     build_requires = "cmake_installer/3.10.0@conan/stable"
     options = { "shared": [True, False],
+                "fPIC": [True, False],
                 "build_examples": [False, True],
                 "build_tests": [False, True],
                 "with_zlib": [True, False],
                 "with_openssl": [True, False] }
-    default_options = "shared=False", "build_examples=False", "build_tests=False", "with_zlib=False", "with_openssl=False"
+    default_options = "shared=False", "fPIC=False", "build_examples=False", "build_tests=False", "with_zlib=False", "with_openssl=False"
 
     folder_name = "{}-{}".format(name, src_version)
     archive_name = "{}.tar.gz".format(folder_name)
@@ -70,6 +71,13 @@ class LibrdkafkaConan(ConanFile):
         '''project(RdKafka)
            include(${CMAKE_BINARY_DIR}/../../conanbuildinfo.cmake)
            conan_basic_setup()''')
+
+        # Respect Conan's shared/fPIC options
+        self.output.info('Patching src/CMakeLists.txt')
+        tools.replace_in_file(
+            os.sep.join([self.folder_name, "src", "CMakeLists.txt"]),
+            "add_library(rdkafka SHARED ${sources})",
+            "add_library(rdkafka ${sources})")
 
         if self.options.build_tests:
             self.output.info('Patching tests/CMakeLists.txt file')
@@ -202,7 +210,6 @@ endif(MSVC)''' % (exe_name, exe_name))
         self.copy("LICENSE.*", src=self.folder_name)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["rdkafka++", "rdkafka"]
         if self.settings.os == 'Linux':
             self.cpp_info.libs.extend([ 'rt', 'dl' ])
-        
