@@ -114,7 +114,8 @@ def get_pipeline(image_key) {
               --build=outdated
           \""""
 
-          // Get package name and version
+          // Use arcane awk magic found on Stack Overflow to get package name
+          // and version from conanfile.py.
           pkg_name_and_version = sh(
             script: """docker exec ${container_name} ${custom_sh} -c \"
                 cd ${project} &&
