@@ -2,7 +2,7 @@ project = "conan-librdkafka"
 
 conan_remote = "ess-dmsc-local"
 conan_user = "ess-dmsc"
-conan_pkg_channel = "upload-test"
+conan_pkg_channel = "testing"
 
 remote_upload_node = "centos7"
 
