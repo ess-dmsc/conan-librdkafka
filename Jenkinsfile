@@ -255,8 +255,8 @@ node {
     def image_key = x
     builders[image_key] = get_pipeline(image_key)
   }
-  builders['macOS'] = get_macos_pipeline()
-  builders['windows10'] = get_win10_pipeline()
+  // builders['macOS'] = get_macos_pipeline()
+  // builders['windows10'] = get_win10_pipeline()
   parallel builders
 
   // Delete workspace when build is done.
