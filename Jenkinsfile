@@ -116,7 +116,7 @@ def get_pipeline(image_key) {
           pkg_name_and_version = sh(
             script: """docker exec ${container_name} ${custom_sh} -c \"
                 cd ${project} &&
-                conan info . | awk -F'@' 'NR==1{print $1}'
+                conan info . | awk -F'@' 'NR==1{print \\\$1}'
               \"""",
             returnStdout: true
           ).trim()
