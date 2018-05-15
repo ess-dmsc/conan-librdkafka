@@ -107,4 +107,4 @@ class LibrdkafkaConan(ConanFile):
         self.copy("LICENSE.*", src=self.folder_name)
 
     def package_info(self):
-        self.cpp_info.libs = ["rdkafka", "rdkafka++", "error"]
+        self.cpp_info.libs = ["rdkafka", "rdkafka++"]
