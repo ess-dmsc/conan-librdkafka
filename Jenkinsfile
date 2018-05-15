@@ -8,23 +8,23 @@ images = [
   'centos7': [
     'name': 'essdmscdm/centos7-build-node:2.1.0',
     'sh': 'sh'
-  ],
-  'centos7-gcc6': [
-    'name': 'essdmscdm/centos7-gcc6-build-node:3.0.0 ',
-    'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
-  ],
-  'debian9': [
-  'name': 'essdmscdm/debian9-build-node:2.0.0',
-  'sh': 'sh'
-  ],
-  'fedora25': [
-    'name': 'essdmscdm/fedora25-build-node:2.0.0',
-    'sh': 'sh'
-  ],
-  'ubuntu1804': [
-    'name': 'essdmscdm/ubuntu18.04-build-node:1.0.0',
-    'sh': 'sh'
-  ]
+  ]//,
+  // 'centos7-gcc6': [
+  //   'name': 'essdmscdm/centos7-gcc6-build-node:3.0.0 ',
+  //   'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
+  // ],
+  // 'debian9': [
+  // 'name': 'essdmscdm/debian9-build-node:2.0.0',
+  // 'sh': 'sh'
+  // ],
+  // 'fedora25': [
+  //   'name': 'essdmscdm/fedora25-build-node:2.0.0',
+  //   'sh': 'sh'
+  // ],
+  // 'ubuntu1804': [
+  //   'name': 'essdmscdm/ubuntu18.04-build-node:1.0.0',
+  //   'sh': 'sh'
+  // ]
 ]
 
 base_container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
@@ -55,7 +55,7 @@ def get_pipeline(image_key) {
           \""""
         }  // stage
 
-        stage("${image_key}: Conan setup") {
+        stage("${image_key}: Conan local server setup") {
           withCredentials([
             string(
               credentialsId: 'local-conan-server-password',
@@ -71,6 +71,25 @@ def get_pipeline(image_key) {
                 --password '${CONAN_PASSWORD}' \
                 --remote ${conan_remote} \
                 ${conan_user} \
+                > /dev/null
+            \""""
+          }  // withCredentials
+        }  // stage
+
+        stage("${image_key}: Conan remote ess-dmsc setup") {
+          withCredentials([
+            usernamePassword(
+              credentialsId: 'cow-bot-bintray-username-and-api-key',
+              passwordVariable: 'COWBOT_PASSWORD',
+              usernameVariable: 'COWBOT_USERNAME'
+            )
+          ]) {
+            sh """docker exec ${container_name} ${custom_sh} -c \"
+              set +x
+              conan user \
+                --password '${COWBOT_PASSWORD}' \
+                --remote ess-dmsc \
+                ${COWBOT_USERNAME} \
                 > /dev/null
             \""""
           }  // withCredentials
@@ -92,15 +111,35 @@ def get_pipeline(image_key) {
               --options librdkafka:shared=True \
               --build=outdated
           \""""
+
+          // Get package name and version
+          pkg_name_and_version = sh(
+            script: """docker exec ${container_name} ${custom_sh} -c \"
+                cd ${project} &&
+                conan info . | awk -F'@' 'NR==1{print $1}'
+              \"""",
+            returnStdout: true
+          ).trim()
         }  // stage
 
-        stage("${image_key}: Upload") {
-          sh """docker exec ${container_name} ${custom_sh} -c \"
-            upload_conan_package.sh ${project}/conanfile.py \
-              ${conan_remote} \
-              ${conan_user} \
-              ${conan_pkg_channel}
-          \""""
+        echo "${pkg_name_and_version}"
+
+        // stage("${image_key}: Local upload") {
+        //   sh """docker exec ${container_name} ${custom_sh} -c \"
+        //     conan upload \
+        //       --no-overwrite \
+        //       --remote ${conan_remote} \
+        //       ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
+        //   \""""
+        //
+        // stage("${image_key}: Remote upload") {
+        //   sh """docker exec ${container_name} ${custom_sh} -c \"
+        //     conan upload \
+        //       --all \
+        //       --no-overwrite \
+        //       --remote ess-dmsc \
+        //       ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
+        //   \""""
         }  // stage
       } finally {
         sh "docker stop ${container_name}"
