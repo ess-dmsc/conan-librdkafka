@@ -129,6 +129,7 @@ def get_pipeline(image_key) {
         stage("${image_key}: Local upload") {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             conan upload \
+              --all \
               --no-overwrite \
               --remote ${conan_remote} \
               ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
@@ -140,7 +141,6 @@ def get_pipeline(image_key) {
           stage("${image_key}: Remote upload") {
             sh """docker exec ${container_name} ${custom_sh} -c \"
               conan upload \
-                --all \
                 --no-overwrite \
                 --remote ess-dmsc \
                 ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
