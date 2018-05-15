@@ -133,6 +133,7 @@ def get_pipeline(image_key) {
               --remote ${conan_remote} \
               ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
           \""""
+        }  // stage
 
         // Upload to remote repository only once
         if (image_key == remote_upload_node) {
