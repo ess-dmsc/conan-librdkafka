@@ -125,8 +125,6 @@ def get_pipeline(image_key) {
           ).trim()
         }  // stage
 
-        echo "${pkg_name_and_version}"
-
         stage("${image_key}: Local upload") {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             conan upload \
