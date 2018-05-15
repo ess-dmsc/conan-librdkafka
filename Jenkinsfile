@@ -2,7 +2,9 @@ project = "conan-librdkafka"
 
 conan_remote = "ess-dmsc-local"
 conan_user = "ess-dmsc"
-conan_pkg_channel = "testing"
+conan_pkg_channel = "upload-test"
+
+remote_upload_node = "centos7"
 
 images = [
   'centos7': [
@@ -124,23 +126,26 @@ def get_pipeline(image_key) {
 
         echo "${pkg_name_and_version}"
 
-        // stage("${image_key}: Local upload") {
-        //   sh """docker exec ${container_name} ${custom_sh} -c \"
-        //     conan upload \
-        //       --no-overwrite \
-        //       --remote ${conan_remote} \
-        //       ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
-        //   \""""
-        //
-        // stage("${image_key}: Remote upload") {
-        //   sh """docker exec ${container_name} ${custom_sh} -c \"
-        //     conan upload \
-        //       --all \
-        //       --no-overwrite \
-        //       --remote ess-dmsc \
-        //       ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
-        //   \""""
-        // }  // stage
+        stage("${image_key}: Local upload") {
+          sh """docker exec ${container_name} ${custom_sh} -c \"
+            conan upload \
+              --no-overwrite \
+              --remote ${conan_remote} \
+              ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
+          \""""
+
+        // Upload to remote repository only once
+        if (image_key == remote_upload_node) {
+          stage("${image_key}: Remote upload") {
+            sh """docker exec ${container_name} ${custom_sh} -c \"
+              conan upload \
+                --all \
+                --no-overwrite \
+                --remote ess-dmsc \
+                ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
+            \""""
+          }  // stage
+        }  // if
       } finally {
         sh "docker stop ${container_name}"
         sh "docker rm -f ${container_name}"
