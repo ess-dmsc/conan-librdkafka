@@ -114,12 +114,11 @@ def get_pipeline(image_key) {
               --build=outdated
           \""""
 
-          // Use arcane awk magic found on Stack Overflow to get package name
-          // and version from conanfile.py.
+          // Use shell script to avoid escaping issues
           pkg_name_and_version = sh(
             script: """docker exec ${container_name} ${custom_sh} -c \"
                 cd ${project} &&
-                conan info . | awk -F'@' 'NR==1{print \\\$1}'
+                ./get_conan_pkg_name_and_version.sh
               \"""",
             returnStdout: true
           ).trim()
@@ -188,13 +187,19 @@ def get_macos_pipeline() {
             --settings librdkafka:build_type=Release \
             --options librdkafka:shared=True \
             --build=outdated"
+
+          pkg_name_and_version = sh(
+            script: "./get_conan_pkg_name_and_version.sh",
+            returnStdout: true
+          ).trim()
         }  // stage
 
         stage("macOS: Upload") {
-          sh "upload_conan_package.sh conanfile.py \
-            ${conan_remote} \
-            ${conan_user} \
-            ${conan_pkg_channel}"
+          sh "conan upload \
+            --all \
+            --no-overwrite \
+            --remote ${conan_remote} \
+            ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
         }  // stage
       }  // dir
     }  // node
