@@ -57,7 +57,7 @@ def get_pipeline(image_key) {
           \""""
         }  // stage
 
-        stage("${image_key}: Conan setup") {
+        stage("${image_key}: Conan local server setup") {
           withCredentials([
             string(
               credentialsId: 'local-conan-server-password',
@@ -73,6 +73,25 @@ def get_pipeline(image_key) {
                 --password '${CONAN_PASSWORD}' \
                 --remote ${conan_remote} \
                 ${conan_user} \
+                > /dev/null
+            \""""
+          }  // withCredentials
+        }  // stage
+
+        stage("${image_key}: Conan remote ess-dmsc setup") {
+          withCredentials([
+            usernamePassword(
+              credentialsId: 'cow-bot-bintray-username-and-api-key',
+              passwordVariable: 'COWBOT_PASSWORD',
+              usernameVariable: 'COWBOT_USERNAME'
+            )
+          ]) {
+            sh """docker exec ${container_name} ${custom_sh} -c \"
+              set +x
+              conan user \
+                --password '${COWBOT_PASSWORD}' \
+                --remote ess-dmsc \
+                ${COWBOT_USERNAME} \
                 > /dev/null
             \""""
           }  // withCredentials
