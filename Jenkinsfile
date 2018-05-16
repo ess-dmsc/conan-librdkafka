@@ -4,6 +4,8 @@ conan_remote = "ess-dmsc-local"
 conan_user = "ess-dmsc"
 conan_pkg_channel = "testing"
 
+remote_upload_node = "centos7"
+
 images = [
   'centos7': [
     'name': 'essdmscdm/centos7-build-node:2.1.0',
@@ -159,19 +161,17 @@ def get_macos_pipeline() {
             --build=outdated"
 
           pkg_name_and_version = sh(
-            script: """docker exec ${container_name} ${custom_sh} -c \"
-                cd ${project} &&
-                conan info . | awk -F'@' 'NR==1{print \\\$1}'
-              \"""",
+            script: "cd ${project} && conan info . | awk -F'@' 'NR==1{print \\\$1}'",
             returnStdout: true
           ).trim()
         }  // stage
 
         stage("macOS: Upload") {
-          sh "upload_conan_package.sh conanfile.py \
-            ${conan_remote} \
-            ${conan_user} \
-            ${conan_pkg_channel}"
+          sh "conan upload \
+            --all \
+            --no-overwrite \
+            --remote ${conan_remote} \
+            ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
         }  // stage
       }  // dir
     }  // node
