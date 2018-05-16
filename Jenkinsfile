@@ -57,7 +57,7 @@ def get_pipeline(image_key) {
           \""""
         }  // stage
 
-        stage("${image_key}: Conan local server setup") {
+        stage("${image_key}: Conan setup") {
           withCredentials([
             string(
               credentialsId: 'local-conan-server-password',
