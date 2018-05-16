@@ -78,25 +78,6 @@ def get_pipeline(image_key) {
           }  // withCredentials
         }  // stage
 
-        stage("${image_key}: Conan remote ess-dmsc setup") {
-          withCredentials([
-            usernamePassword(
-              credentialsId: 'cow-bot-bintray-username-and-api-key',
-              passwordVariable: 'COWBOT_PASSWORD',
-              usernameVariable: 'COWBOT_USERNAME'
-            )
-          ]) {
-            sh """docker exec ${container_name} ${custom_sh} -c \"
-              set +x
-              conan user \
-                --password '${COWBOT_PASSWORD}' \
-                --remote ess-dmsc \
-                ${COWBOT_USERNAME} \
-                > /dev/null
-            \""""
-          }  // withCredentials
-        }  // stage
-
         stage("${image_key}: Package") {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             cd ${project}
@@ -129,6 +110,23 @@ def get_pipeline(image_key) {
         // Upload to remote repository only once
         if (image_key == remote_upload_node) {
           stage("${image_key}: Remote upload") {
+            withCredentials([
+              usernamePassword(
+                credentialsId: 'cow-bot-bintray-username-and-api-key',
+                passwordVariable: 'COWBOT_PASSWORD',
+                usernameVariable: 'COWBOT_USERNAME'
+              )
+            ]) {
+              sh """docker exec ${container_name} ${custom_sh} -c \"
+                set +x
+                conan user \
+                  --password '${COWBOT_PASSWORD}' \
+                  --remote ess-dmsc \
+                  ${COWBOT_USERNAME} \
+                  > /dev/null
+              \""""
+            }  // withCredentials
+
             sh """docker exec ${container_name} ${custom_sh} -c \"
               conan upload \
                 --no-overwrite \
