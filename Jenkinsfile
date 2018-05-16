@@ -87,10 +87,11 @@ def get_pipeline(image_key) {
               --build=outdated
           \""""
 
+          // Use shell script to avoid escaping issues
           pkg_name_and_version = sh(
             script: """docker exec ${container_name} ${custom_sh} -c \"
                 cd ${project} &&
-                conan info . | awk -F'@' 'NR==1{print \\\$1}'
+                ./get_conan_pkg_name_and_version.sh
               \"""",
             returnStdout: true
           ).trim()
@@ -161,7 +162,7 @@ def get_macos_pipeline() {
             --build=outdated"
 
           pkg_name_and_version = sh(
-            script: "cd ${project} && conan info . | awk -F'@' 'NR==1{print \\\$1}'",
+            script: "./get_conan_pkg_name_and_version.sh",
             returnStdout: true
           ).trim()
         }  // stage
