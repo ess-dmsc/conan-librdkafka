@@ -18,6 +18,7 @@ class LibrdkafkaConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = "shared=False"
     exports = "files/*"
+    requires = "zlib/1.2.11@conan/stable"
 
     folder_name = "{}-{}".format(name, src_version)
     archive_name = "{}.tar.gz".format(folder_name)
