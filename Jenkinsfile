@@ -85,23 +85,36 @@ def get_pipeline(image_key) {
               --build=outdated
           \""""
 
+          pkg_name_and_version = sh(
+            script: """docker exec ${container_name} ${custom_sh} -c \"
+                cd ${project} &&
+                conan info . | awk -F'@' 'NR==1{print \\\$1}'
+              \"""",
+            returnStdout: true
+          ).trim()
+        }  // stage
+
+        stage("${image_key}: Local upload") {
           sh """docker exec ${container_name} ${custom_sh} -c \"
-            cd ${project}
-            conan create . ${conan_user}/${conan_pkg_channel} \
-              --settings librdkafka:build_type=Release \
-              --options librdkafka:shared=True \
-              --build=outdated
+            conan upload \
+              --all \
+              --no-overwrite \
+              --remote ${conan_remote} \
+              ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
           \""""
         }  // stage
 
-        stage("${image_key}: Upload") {
-          sh """docker exec ${container_name} ${custom_sh} -c \"
-            upload_conan_package.sh ${project}/conanfile.py \
-              ${conan_remote} \
-              ${conan_user} \
-              ${conan_pkg_channel}
-          \""""
-        }  // stage
+        // Upload to remote repository only once
+        if (image_key == remote_upload_node) {
+          stage("${image_key}: Remote upload") {
+            sh """docker exec ${container_name} ${custom_sh} -c \"
+              conan upload \
+                --no-overwrite \
+                --remote ess-dmsc \
+                ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
+            \""""
+          }  // stage
+        }  // if
       } finally {
         sh "docker stop ${container_name}"
         sh "docker rm -f ${container_name}"
@@ -144,6 +157,14 @@ def get_macos_pipeline() {
             --settings librdkafka:build_type=Release \
             --options librdkafka:shared=True \
             --build=outdated"
+
+          pkg_name_and_version = sh(
+            script: """docker exec ${container_name} ${custom_sh} -c \"
+                cd ${project} &&
+                conan info . | awk -F'@' 'NR==1{print \\\$1}'
+              \"""",
+            returnStdout: true
+          ).trim()
         }  // stage
 
         stage("macOS: Upload") {
