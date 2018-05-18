@@ -8,19 +8,11 @@ remote_upload_node = "centos7"
 
 images = [
   'centos7': [
-    'name': 'essdmscdm/centos7-build-node:2.1.0',
-    'sh': 'sh'
-  ],
-  'centos7-gcc6': [
-    'name': 'essdmscdm/centos7-gcc6-build-node:3.0.0 ',
-    'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
+    'name': 'essdmscdm/centos7-build-node:3.0.0',
+    'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash'
   ],
   'debian9': [
-  'name': 'essdmscdm/debian9-build-node:2.0.0',
-  'sh': 'sh'
-  ],
-  'fedora25': [
-    'name': 'essdmscdm/fedora25-build-node:2.0.0',
+    'name': 'essdmscdm/debian9-build-node:2.0.0',
     'sh': 'sh'
   ],
   'ubuntu1804': [
@@ -30,6 +22,17 @@ images = [
 ]
 
 base_container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+
+if (conan_pkg_channel == "stable" && env.BRANCH_NAME != "master") {
+  error("Only the master branch can create a package for the stable channel")
+}
+
+// Allow overwriting packages if this is not the stable channel
+if (conan_pkg_channel == "stable") {
+  conan_upload_flag = "--no-overwrite"
+} else {
+  conan_upload_flag = ""
+}
 
 def get_pipeline(image_key) {
   return {
@@ -109,7 +112,7 @@ def get_pipeline(image_key) {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             conan upload \
               --all \
-              --no-overwrite \
+              ${conan_upload_flag} \
               --remote ${conan_remote} \
               ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
           \""""
@@ -137,7 +140,7 @@ def get_pipeline(image_key) {
 
             sh """docker exec ${container_name} ${custom_sh} -c \"
               conan upload \
-                --no-overwrite \
+                ${conan_upload_flag} \
                 --remote ess-dmsc \
                 ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
             \""""
@@ -195,7 +198,7 @@ def get_macos_pipeline() {
         stage("macOS: Upload") {
           sh "conan upload \
             --all \
-            --no-overwrite \
+            ${conan_upload_flag} \
             --remote ${conan_remote} \
             ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
         }  // stage
