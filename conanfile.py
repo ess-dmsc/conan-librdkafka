@@ -58,7 +58,7 @@ class LibrdkafkaConan(ConanFile):
             self.folder_name = "librdkafka-{}".format(self.win32_sha)
             patch = os.path.join(self.source_folder, "files", self.win32_patch_name)
             tools.patch(base_path=self.folder_name, patch_file=patch)
-        
+
         files.mkdir("./{}/build".format(self.folder_name))
         with tools.chdir("./{}/build".format(self.folder_name)):
             cmake = CMake(self)
