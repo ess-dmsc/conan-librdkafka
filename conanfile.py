@@ -11,7 +11,6 @@ class LibrdkafkaConan(ConanFile):
     version = src_version
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
-    win32_patch_name = "win32.patch"
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
     build_requires = "cmake_installer/3.10.0@conan/stable"
@@ -42,10 +41,6 @@ class LibrdkafkaConan(ConanFile):
 
     def build(self):
         if tools.os_info.is_windows:
-            # Can be removed after moving to 0.11.4
-            patch = os.path.join(self.source_folder, "files", self.win32_patch_name)
-            tools.patch(base_path=self.folder_name, patch_file=patch)
-
             files.mkdir("./{}/build".format(self.folder_name))
             with tools.chdir("./{}/build".format(self.folder_name)):
                 cmake = CMake(self)
