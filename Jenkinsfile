@@ -8,19 +8,11 @@ remote_upload_node = "centos7"
 
 images = [
   'centos7': [
-    'name': 'essdmscdm/centos7-build-node:2.1.0',
-    'sh': 'sh'
-  ],
-  'centos7-gcc6': [
-    'name': 'essdmscdm/centos7-gcc6-build-node:3.0.0 ',
-    'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
+    'name': 'essdmscdm/centos7-build-node:3.0.0',
+    'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash'
   ],
   'debian9': [
-  'name': 'essdmscdm/debian9-build-node:2.0.0',
-  'sh': 'sh'
-  ],
-  'fedora25': [
-    'name': 'essdmscdm/fedora25-build-node:2.0.0',
+    'name': 'essdmscdm/debian9-build-node:2.0.0',
     'sh': 'sh'
   ],
   'ubuntu1804': [
@@ -30,6 +22,15 @@ images = [
 ]
 
 base_container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+
+if (conan_pkg_channel == "stable") {
+  if (env.BRANCH_NAME != "master") {
+    error("Only the master branch can create a package for the stable channel")
+  }
+  conan_upload_flag = "--no-overwrite"
+} else {
+  conan_upload_flag = ""
+}
 
 def get_pipeline(image_key) {
   return {
@@ -87,6 +88,17 @@ def get_pipeline(image_key) {
               --build=outdated
           \""""
 
+<<<<<<< HEAD
+=======
+          sh """docker exec ${container_name} ${custom_sh} -c \"
+            cd ${project}
+            conan create . ${conan_user}/${conan_pkg_channel} \
+              --settings librdkafka:build_type=Release \
+              --options librdkafka:shared=True \
+              --build=outdated
+          \""""
+
+>>>>>>> master
           // Use shell script to avoid escaping issues
           pkg_name_and_version = sh(
             script: """docker exec ${container_name} ${custom_sh} -c \"
@@ -101,7 +113,11 @@ def get_pipeline(image_key) {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             conan upload \
               --all \
+<<<<<<< HEAD
               --no-overwrite \
+=======
+              ${conan_upload_flag} \
+>>>>>>> master
               --remote ${conan_remote} \
               ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
           \""""
@@ -129,7 +145,11 @@ def get_pipeline(image_key) {
 
             sh """docker exec ${container_name} ${custom_sh} -c \"
               conan upload \
+<<<<<<< HEAD
                 --no-overwrite \
+=======
+                ${conan_upload_flag} \
+>>>>>>> master
                 --remote ess-dmsc \
                 ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
             \""""
@@ -187,7 +207,11 @@ def get_macos_pipeline() {
         stage("macOS: Upload") {
           sh "conan upload \
             --all \
+<<<<<<< HEAD
             --no-overwrite \
+=======
+            ${conan_upload_flag} \
+>>>>>>> master
             --remote ${conan_remote} \
             ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
         }  // stage
