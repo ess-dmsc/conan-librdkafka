@@ -23,12 +23,10 @@ images = [
 
 base_container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
-if (conan_pkg_channel == "stable" && env.BRANCH_NAME != "master") {
-  error("Only the master branch can create a package for the stable channel")
-}
-
-// Allow overwriting packages if this is not the stable channel
 if (conan_pkg_channel == "stable") {
+  if (env.BRANCH_NAME != "master") {
+    error("Only the master branch can create a package for the stable channel")
+  }
   conan_upload_flag = "--no-overwrite"
 } else {
   conan_upload_flag = ""
