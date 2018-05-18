@@ -88,8 +88,6 @@ def get_pipeline(image_key) {
               --build=outdated
           \""""
 
-<<<<<<< HEAD
-=======
           sh """docker exec ${container_name} ${custom_sh} -c \"
             cd ${project}
             conan create . ${conan_user}/${conan_pkg_channel} \
@@ -98,7 +96,6 @@ def get_pipeline(image_key) {
               --build=outdated
           \""""
 
->>>>>>> master
           // Use shell script to avoid escaping issues
           pkg_name_and_version = sh(
             script: """docker exec ${container_name} ${custom_sh} -c \"
@@ -113,11 +110,7 @@ def get_pipeline(image_key) {
           sh """docker exec ${container_name} ${custom_sh} -c \"
             conan upload \
               --all \
-<<<<<<< HEAD
-              --no-overwrite \
-=======
               ${conan_upload_flag} \
->>>>>>> master
               --remote ${conan_remote} \
               ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
           \""""
@@ -145,11 +138,7 @@ def get_pipeline(image_key) {
 
             sh """docker exec ${container_name} ${custom_sh} -c \"
               conan upload \
-<<<<<<< HEAD
-                --no-overwrite \
-=======
                 ${conan_upload_flag} \
->>>>>>> master
                 --remote ess-dmsc \
                 ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
             \""""
@@ -207,11 +196,7 @@ def get_macos_pipeline() {
         stage("macOS: Upload") {
           sh "conan upload \
             --all \
-<<<<<<< HEAD
-            --no-overwrite \
-=======
             ${conan_upload_flag} \
->>>>>>> master
             --remote ${conan_remote} \
             ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
         }  // stage
