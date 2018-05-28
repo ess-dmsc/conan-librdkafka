@@ -16,7 +16,7 @@ images = [
     'sh': 'sh'
   ],
   'ubuntu1804': [
-    'name': 'essdmscdm/ubuntu18.04-build-node:1.0.0',
+    'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
     'sh': 'sh'
   ]
 ]
