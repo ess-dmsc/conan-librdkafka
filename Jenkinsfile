@@ -2,36 +2,35 @@ project = "conan-librdkafka"
 
 conan_remote = "ess-dmsc-local"
 conan_user = "ess-dmsc"
-conan_pkg_channel = "testing"
+conan_pkg_channel = "stable"
+
+remote_upload_node = "centos7"
 
 images = [
   'centos7': [
-    'name': 'essdmscdm/centos7-build-node:1.0.1',
-    'sh': 'sh'
-  ],
-  'centos7-gcc6': [
-    'name': 'essdmscdm/centos7-gcc6-build-node:1.0.0',
-    'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
+    'name': 'essdmscdm/centos7-build-node:3.0.0',
+    'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash'
   ],
   'debian9': [
-  'name': 'essdmscdm/debian9-build-node:1.0.0',
-  'sh': 'sh'
-  ],
-  'fedora25': [
-    'name': 'essdmscdm/fedora25-build-node:1.0.0',
+    'name': 'essdmscdm/debian9-build-node:2.0.0',
     'sh': 'sh'
   ],
-  'ubuntu1604': [
-    'name': 'essdmscdm/ubuntu16.04-build-node:2.0.0',
-    'sh': 'sh'
-  ],
-  'ubuntu1710': [
-    'name': 'essdmscdm/ubuntu17.10-build-node:1.0.0',
+  'ubuntu1804': [
+    'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
     'sh': 'sh'
   ]
 ]
 
 base_container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+
+if (conan_pkg_channel == "stable") {
+  if (env.BRANCH_NAME != "master") {
+    error("Only the master branch can create a package for the stable channel")
+  }
+  conan_upload_flag = "--no-overwrite"
+} else {
+  conan_upload_flag = ""
+}
 
 def get_pipeline(image_key) {
   return {
@@ -96,16 +95,55 @@ def get_pipeline(image_key) {
               --options librdkafka:shared=True \
               --build=outdated
           \""""
+
+          // Use shell script to avoid escaping issues
+          pkg_name_and_version = sh(
+            script: """docker exec ${container_name} ${custom_sh} -c \"
+                cd ${project} &&
+                ./get_conan_pkg_name_and_version.sh
+              \"""",
+            returnStdout: true
+          ).trim()
         }  // stage
 
-        stage("${image_key}: Upload") {
+        stage("${image_key}: Local upload") {
           sh """docker exec ${container_name} ${custom_sh} -c \"
-            upload_conan_package.sh ${project}/conanfile.py \
-              ${conan_remote} \
-              ${conan_user} \
-              ${conan_pkg_channel}
+            conan upload \
+              --all \
+              ${conan_upload_flag} \
+              --remote ${conan_remote} \
+              ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
           \""""
         }  // stage
+
+        // Upload to remote repository only once
+        if (image_key == remote_upload_node) {
+          stage("${image_key}: Remote upload") {
+            withCredentials([
+              usernamePassword(
+                credentialsId: 'cow-bot-bintray-username-and-api-key',
+                passwordVariable: 'COWBOT_PASSWORD',
+                usernameVariable: 'COWBOT_USERNAME'
+              )
+            ]) {
+              sh """docker exec ${container_name} ${custom_sh} -c \"
+                set +x
+                conan user \
+                  --password '${COWBOT_PASSWORD}' \
+                  --remote ess-dmsc \
+                  ${COWBOT_USERNAME} \
+                  > /dev/null
+              \""""
+            }  // withCredentials
+
+            sh """docker exec ${container_name} ${custom_sh} -c \"
+              conan upload \
+                ${conan_upload_flag} \
+                --remote ess-dmsc \
+                ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}
+            \""""
+          }  // stage
+        }  // if
       } finally {
         sh "docker stop ${container_name}"
         sh "docker rm -f ${container_name}"
@@ -148,13 +186,19 @@ def get_macos_pipeline() {
             --settings librdkafka:build_type=Release \
             --options librdkafka:shared=True \
             --build=outdated"
+
+          pkg_name_and_version = sh(
+            script: "./get_conan_pkg_name_and_version.sh",
+            returnStdout: true
+          ).trim()
         }  // stage
 
         stage("macOS: Upload") {
-          sh "upload_conan_package.sh conanfile.py \
-            ${conan_remote} \
-            ${conan_user} \
-            ${conan_pkg_channel}"
+          sh "conan upload \
+            --all \
+            ${conan_upload_flag} \
+            --remote ${conan_remote} \
+            ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
         }  // stage
       }  // dir
     }  // node

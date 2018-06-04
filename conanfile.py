@@ -1,18 +1,16 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, AutoToolsBuildEnvironment, tools
 from conans.util import files
 
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    sha256 = "2b96d7ed71470b0d0027bd9f0b6eb8fb68ed979f8092611c148771eb01abb72c"
+    sha256 = "9d8f1eb7b0e29e9ab1168347c939cb7ae5dff00a39cef99e7ef033fd8f92737c"
 
-    src_version = "0.11.3"
-    version = "0.11.3-dm3"
+    src_version = "0.11.4"
+    version = src_version
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
-    win32_patch_name = "win32.patch"
-    win32_sha = "6eeb23b13726d371b737bb39b8d667d36b8793b5"
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
@@ -47,33 +45,21 @@ class LibrdkafkaConan(ConanFile):
 
 
     def source(self):
-        if tools.os_info.is_windows:
-            # For windows we use an RC of 0.11.4 as it has cmake fixes.
-            # Once we move to 0.11.4+ this can be removed.
-            tools.download(
-                "https://github.com/edenhill/librdkafka/archive/{}.tar.gz".format(
-                    self.win32_sha
-                ),
-                self.archive_name
-            )
-            self.folder_name = "librdkafka-{}".format(self.win32_sha)
-        else:
-            tools.download(
-                "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
-                    self.src_version
-                ),
-                self.archive_name
-            )
-            tools.check_sha256(
-                self.archive_name,
-                self.sha256
-            )
+        tools.download(
+            "https://github.com/edenhill/librdkafka/archive/v{}.tar.gz".format(
+                self.src_version
+            ),
+            self.archive_name
+        )
+        tools.check_sha256(
+            self.archive_name,
+            self.sha256
+        )
         tools.unzip(self.archive_name)
         os.unlink(self.archive_name)
 
     def build(self):
-    
-        self.folder_name = "librdkafka-{}".format(self.win32_sha)
+        if tools.os_info.is_windows:
     
         # put conan inclusion into CMakeLists.txt file or fail (strict=True)
         self.output.info('Patching CMakeLists.txt')
@@ -109,40 +95,72 @@ class LibrdkafkaConan(ConanFile):
         tools.replace_in_file(os.sep.join([self.folder_name, "examples", "rdkafka_example.cpp"]), 'RdKafka::Topic::OFFSET_BEGINNING', 'RD_KAFKA_OFFSET_BEGINNING')
         tools.replace_in_file(os.sep.join([self.folder_name, "examples", "rdkafka_example.cpp"]), 'RdKafka::Topic::OFFSET_END', 'RD_KAFKA_OFFSET_END')
         tools.replace_in_file(os.sep.join([self.folder_name, "examples", "rdkafka_example.cpp"]), 'RdKafka::Topic::OFFSET_STORED', 'RD_KAFKA_OFFSET_STORED')
-
-        files.mkdir("./{}/build".format(self.folder_name))
-        with tools.chdir("./{}/build".format(self.folder_name)):
-            cmake = CMake(self)
+            files.mkdir("./{}/build".format(self.folder_name))
+            with tools.chdir("./{}/build".format(self.folder_name)):
+                cmake = CMake(self)
 
             cmake.definitions["RDKAFKA_BUILD_EXAMPLES"] = "ON" if self.options.build_examples else "OFF"
             cmake.definitions["RDKAFKA_BUILD_TESTS"] = "ON"  if self.options.build_tests else "OFF"
-            cmake.definitions["WITH_LIBDL"] = "OFF"
-            cmake.definitions["WITH_PLUGINS"] = "OFF"
-            cmake.definitions["WITH_SASL"] = "OFF"
+                cmake.definitions["WITH_LIBDL"] = "OFF"
+                cmake.definitions["WITH_PLUGINS"] = "OFF"
+                cmake.definitions["WITH_SASL"] = "OFF"
             cmake.definitions["WITH_SSL"] = "ON" if self.options.with_openssl else "OFF"
             cmake.definitions["WITH_ZLIB"] = "ON" if self.options.with_zlib else "OFF"
-            if tools.os_info.is_macos and self.options.shared:
-                cmake.definitions["CMAKE_MACOSX_RPATH"] = "ON"
 
-            if self.settings.build_type == "Debug":
-                cmake.definitions["WITHOUT_OPTIMIZATION"] = "ON"
-            if self.options.shared:
-                cmake.definitions["BUILD_SHARED_LIBS"] = "ON"
+                if self.settings.build_type == "Debug":
+                    cmake.definitions["WITHOUT_OPTIMIZATION"] = "ON"
+                if self.options.shared:
+                    cmake.definitions["BUILD_SHARED_LIBS"] = "ON"
 
-            if tools.os_info.is_windows:
                 # Enables overridding of default window build settings
                 cmake.definitions["WITHOUT_WIN32_CONFIG"] = "ON"
 
-            cmake.configure(source_dir="..", build_dir=".")
-            cmake.build(build_dir=".")
+                cmake.configure(source_dir="..", build_dir=".")
+                cmake.build(build_dir=".")
+        else:
+            configure_args = [
+                "--prefix=",
+                "--disable-lz4",
+                "--disable-ssl",
+                "--disable-sasl"
+            ]
 
-            os.rename("../LICENSE", "../LICENSE.librdkafka")
+            if self.options.shared:
+                ldflags = os.environ.get("LDFLAGS", "")
+                if tools.os_info.is_linux:
+                    os.environ["LDFLAGS"] = ldflags + " -Wl,-rpath=\$$ORIGIN"
+                elif tools.os_info.is_macos:
+                    os.environ["LDFLAGS"] = ldflags + " -headerpad_max_install_names"
+            else:
+                configure_args.append("--enable-static")
+
+            if self.settings.build_type == "Debug":
+                configure_args.append("--disable-optimization")
+
+            destdir = os.path.join(os.getcwd(), "install")
+            with tools.chdir(self.folder_name):
+                if tools.os_info.is_macos and self.options.shared:
+                    path = os.path.join(os.getcwd(), "mklove", "modules", "configure.lib")
+                    tools.replace_in_file(
+                        path,
+                         '-dynamiclib -Wl,-install_name,$(DESTDIR)$(libdir)/$(LIBFILENAME)',
+                         '-dynamiclib -Wl,-install_name,@rpath/$(LIBFILENAME)',
+                    )
+
+                env_build = AutoToolsBuildEnvironment(self)
+                env_build.configure(args=configure_args)
+                env_build.make()
+                env_build.make(args=["install", "DESTDIR="+destdir])
+
+        with tools.chdir(self.folder_name):
+            os.rename("LICENSE", "LICENSE.librdkafka")
 
     def package(self):
-        self.copy("rdkafka.h", dst="include/librdkafka",
-                  src="{}/src".format(self.folder_name))
-        self.copy("rdkafkacpp.h", dst="include/librdkafka",
-                  src="{}/src-cpp".format(self.folder_name))
+        if tools.os_info.is_windows:
+            self.copy("rdkafka.h", dst="include/librdkafka",
+                      src="{}/src".format(self.folder_name))
+            self.copy("rdkafkacpp.h", dst="include/librdkafka",
+                      src="{}/src-cpp".format(self.folder_name))
         
         # Copy Windows import libraries, program DB's, export, linker input files, etc...
         self.copy("*.lib", src=os.sep.join([self.folder_name, 'build', 'lib' ]), dst="lib", keep_path=False, excludes="configure.lib")
@@ -162,14 +180,19 @@ class LibrdkafkaConan(ConanFile):
 
         # Copy Linux/Mac files
         self.copy("*.a", dst="lib", keep_path=False)
-
-        if tools.os_info.is_macos:
-            self.copy("*.dylib*", dst="lib", keep_path=False)
-        elif tools.os_info.is_windows:
             self.copy("*.lib", dst="lib", keep_path=False, excludes="configure.lib")
+            self.copy("LICENSE.*", src=self.folder_name)
         else:
-            self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
-        self.copy("LICENSE.*", src=self.folder_name)
+            install_folder = os.path.join(self.build_folder, "install")
+            self.copy("*.h", src=install_folder)
+            if self.options.shared:
+                if tools.os_info.is_linux:
+                    self.copy("*.so*", src=install_folder)
+                elif tools.os_info.is_macos:
+                    self.copy("*.dylib*", src=install_folder)
+            else:
+                self.copy("*.a", src=install_folder)
+            self.copy("LICENSE.*", src=self.folder_name)
 
     def package_info(self):
         self.cpp_info.libs = [ 'rdkafka', 'rdkafka++' ]
