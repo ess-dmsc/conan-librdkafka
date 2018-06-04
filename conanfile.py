@@ -98,11 +98,10 @@ class LibrdkafkaConan(ConanFile):
 ''',
 '#include "../config.h"')
 
-        # rdkafka C++ library does not export the special partition and offset constants/values
-        # from the DLL, and looks like is switching to a preprocessor define instead.  This includes
-        # the C-header file just to get the macro values, and then changes the constants from being
-        # used as imported values to read from the macros.
-        self.output.info('pwd=%s' % (os.getcwd()))
+        # rdkafka C++ library does not export the special partition and offset constants/values 
+        # variables from the DLL, and looks like the library is switching to a preprocessor define 
+        # instead.  This change includes the C-header file just to get the macro values, and then 
+        # changes the constants from being used as imported values to read from the macros.
         tools.replace_in_file(os.sep.join([self.folder_name, "examples", "rdkafka_example.cpp"]), '#include "rdkafkacpp.h"', 
 '''#include "rdkafkacpp.h"
 #include "rdkafka.h"''')
@@ -146,7 +145,7 @@ class LibrdkafkaConan(ConanFile):
                   src="{}/src-cpp".format(self.folder_name))
         
         # Copy Windows import libraries, program DB's, export, linker input files, etc...
-        self.copy("*.lib", src=os.sep.join([self.folder_name, 'build', 'lib' ]), dst="lib", keep_path=False)
+        self.copy("*.lib", src=os.sep.join([self.folder_name, 'build', 'lib' ]), dst="lib", keep_path=False, excludes="configure.lib")
         self.copy("*.exp", src=os.sep.join([self.folder_name, 'build', 'lib' ]), dst="lib", keep_path=False)
         self.copy("*.pdb", src=os.sep.join([self.folder_name, 'build', 'lib' ]), dst="bin", keep_path=False)
         
@@ -162,18 +161,18 @@ class LibrdkafkaConan(ConanFile):
             self.copy(example_bin, src=os.sep.join([self.folder_name, 'build', 'bin' ]), dst="bin", keep_path=False)
 
         # Copy Linux/Mac files
-            self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("*.a", dst="lib", keep_path=False)
 
         if tools.os_info.is_macos:
             self.copy("*.dylib*", dst="lib", keep_path=False)
         elif tools.os_info.is_windows:
-            self.copy("*.lib", dst="lib", keep_path=False)
+            self.copy("*.lib", dst="lib", keep_path=False, excludes="configure.lib")
         else:
             self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
         self.copy("LICENSE.*", src=self.folder_name)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = [ 'rdkafka', 'rdkafka++' ]
         if self.settings.os == 'Linux':
             self.cpp_info.libs.extend([ 'rt', 'dl' ])
         
