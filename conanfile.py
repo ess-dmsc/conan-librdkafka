@@ -76,6 +76,24 @@ class LibrdkafkaConan(ConanFile):
         '''project(RdKafka)
            include(${CMAKE_BINARY_DIR}/../../conanbuildinfo.cmake)
            conan_basic_setup()''')        
+
+        # Some situations like using a bad passphrase causes rk to never be initialized
+        # so calling this function would cause a segfault.  Input validation would be helpful.
+        tools.replace_in_file(os.sep.join([self.folder_name, "src", "rdkafka.c"]), 
+        '''static void rd_kafka_destroy_app (rd_kafka_t *rk, int blocking) {
+        thrd_t thrd;
+#ifndef _MSC_VER
+	int term_sig = rk->rk_conf.term_sig;
+#endif''',
+'''static void rd_kafka_destroy_app (rd_kafka_t *rk, int blocking) {
+        if (rk == NULL)
+        {
+            return;
+        }
+        thrd_t thrd;
+#ifndef _MSC_VER
+	int term_sig = rk->rk_conf.term_sig;
+#endif''')
         
         if tools.os_info.is_windows:
                 
