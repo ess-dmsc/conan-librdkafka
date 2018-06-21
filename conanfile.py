@@ -157,10 +157,13 @@ class LibrdkafkaConan(ConanFile):
         else:
             configure_args = [
                 "--prefix=",
-                "--disable-lz4",
-                "--disable-ssl",
                 "--disable-sasl"
             ]
+
+            if not self.options.with_openssl:
+                configure_args.append('--disable-ssl')
+            if not self.options.with_zlib:
+                configure_args.append('--disable-lz4')
 
             if self.options.shared:
                 ldflags = os.environ.get("LDFLAGS", "")
