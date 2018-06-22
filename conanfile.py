@@ -227,7 +227,7 @@ class LibrdkafkaConan(ConanFile):
             self.copy("*.h", src=install_folder)
             if self.options.shared:
                 if tools.os_info.is_linux:
-                    self.copy("*.so*", src=install_folder)
+                    self.copy("*.so*", src=install_folder, symlinks=True)
                 elif tools.os_info.is_macos:
                     self.copy("*.dylib*", src=install_folder)
             else:
