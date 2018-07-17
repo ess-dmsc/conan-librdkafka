@@ -16,9 +16,5 @@ message(INFO "libc = ${LibRDKafka_C_LIBRARIES}")
 add_executable(example example.cpp)
 target_link_libraries(
   example
-  ${LibRDKafka_LIBRARIES}
-  ${LibRDKafka_C_LIBRARIES}
-  ${CMAKE_THREAD_LIBS_INIT}
-  ${ZLIB_LIBRARIES}
-  ${CMAKE_DL_LIBS}
+  ${CONAN_LIBS}
 )

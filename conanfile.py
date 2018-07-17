@@ -17,6 +17,7 @@ class LibrdkafkaConan(ConanFile):
     build_requires = "cmake_installer/3.10.0@conan/stable"
 
     options = { "shared": [True, False],
+                "fPIC": [True, False],
                 "build_examples": [False, True],
                 "build_tests": [False, True],
                 "with_zlib": [True, False],
@@ -26,7 +27,7 @@ class LibrdkafkaConan(ConanFile):
                 "with_sharedptr_debug": [True, False],
                 "with_optimization": [True, False] }
 
-    default_options = ( "shared=False", "build_examples=False", "build_tests=False", 
+    default_options = ( "shared=False", "fPIC=False", "build_examples=False", "build_tests=False", 
                         "with_zlib=False", "with_openssl=False", "with_devel_asserts=False", 
                         "with_refcount_debug=False", "with_sharedptr_debug=False", "with_optimization=False" )
 
@@ -46,11 +47,9 @@ class LibrdkafkaConan(ConanFile):
         # Remove these options on Windows because they require
         # UNIX/BSD-specific header files and functions
         if self.settings.os == 'Windows':
-            
             if self.options.build_tests:
                 self.output.warn('Ignoring build_tests option on Windows')
                 self.options.build_tests = False
-
 
     def source(self):
         tools.download(
@@ -75,7 +74,17 @@ class LibrdkafkaConan(ConanFile):
         tools.replace_in_file(os.sep.join([self.folder_name, "CMakeLists.txt"]), "project(RdKafka)",
         '''project(RdKafka)
            include(${CMAKE_BINARY_DIR}/../../conanbuildinfo.cmake)
-           conan_basic_setup()''')        
+           conan_basic_setup()''')
+
+        # Respect Conan's shared/fPIC options
+        self.output.info('Patching src/CMakeLists.txt')
+        tools.replace_in_file(
+            os.sep.join([self.folder_name, "src", "CMakeLists.txt"]),
+            "add_library(rdkafka SHARED ${sources})",
+            '''add_definitions(-D{})
+            add_library(rdkafka ${{sources}})'''.format(
+                'LIBRDKAFKA_EXPORTS' if self.options.shared else
+                'LIBRDKAFKA_STATICLIB'))
 
         # Some situations like using a bad passphrase causes rk to never be initialized
         # so calling this function would cause a segfault.  Input validation would be helpful.
@@ -125,6 +134,17 @@ class LibrdkafkaConan(ConanFile):
 #endif
 ''',
 '#include "../config.h"')
+
+            # librdkafka inconsistently defines its exports definition, so this defines it according to rdkafkacpp.h
+            self.output.info('Patching src-cpp/CMakeLists.txt file')
+            tools.replace_in_file(os.sep.join([self.folder_name, 'src-cpp', 'CMakeLists.txt']),
+                'add_library(',
+                '''
+                add_definitions(-D{})
+                add_library(
+                '''.format('LIBRDKAFKACPP_EXPORTS' if self.options.shared else
+                           'LIBRDKAFKA_STATICLIB')
+            )
 
             files.mkdir("./{}/build".format(self.folder_name))
             with tools.chdir("./{}/build".format(self.folder_name)):
@@ -235,7 +255,8 @@ class LibrdkafkaConan(ConanFile):
             self.copy("LICENSE.*", src=self.folder_name)
 
     def package_info(self):
-        self.cpp_info.libs = [ 'rdkafka', 'rdkafka++' ]
+        self.cpp_info.libs = ["rdkafka++", "rdkafka"]
         if self.settings.os == 'Linux':
             self.cpp_info.libs.extend([ 'rt', 'dl' ])
-        
+        if not self.options.shared:
+            self.cpp_info.defines.append('LIBRDKAFKA_STATICLIB')
