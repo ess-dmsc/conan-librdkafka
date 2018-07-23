@@ -5,9 +5,9 @@ from conans.util import files
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    sha256 = "9d8f1eb7b0e29e9ab1168347c939cb7ae5dff00a39cef99e7ef033fd8f92737c"
+    sha256 = "cc6ebbcd0a826eec1b8ce1f625ffe71b53ef3290f8192b6cae38412a958f4fd3"
 
-    src_version = "0.11.4"
+    src_version = "0.11.5"
     version = src_version
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
@@ -74,7 +74,7 @@ class LibrdkafkaConan(ConanFile):
             if self.options.shared:
                 ldflags = os.environ.get("LDFLAGS", "")
                 if tools.os_info.is_linux:
-                    os.environ["LDFLAGS"] = ldflags + " -Wl,-rpath=\$$ORIGIN"
+                    os.environ["LDFLAGS"] = ldflags + " -Wl,-rpath=\\$$ORIGIN"
                 elif tools.os_info.is_macos:
                     os.environ["LDFLAGS"] = ldflags + " -headerpad_max_install_names"
             else:
@@ -115,7 +115,7 @@ class LibrdkafkaConan(ConanFile):
             self.copy("*.h", src=install_folder)
             if self.options.shared:
                 if tools.os_info.is_linux:
-                    self.copy("*.so*", src=install_folder)
+                    self.copy("*.so*", src=install_folder, symlinks=True)
                 elif tools.os_info.is_macos:
                     self.copy("*.dylib*", src=install_folder)
             else:
