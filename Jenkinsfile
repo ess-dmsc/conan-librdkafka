@@ -15,6 +15,7 @@ containerBuildNodes = [
 ]
 
 packageBuilder = new ConanPackageBuilder(this, containerBuildNodes, conan_pkg_channel)
+packageBuilder.setRemoteUploadNode('centos')
 
 builders = packageBuilder.createPackageBuilders { container ->
   packageBuilder.addConfiguration(container, [
@@ -48,11 +49,17 @@ node {
 }
 
 def get_macos_pipeline() {
-  String conan_upload_flag
+  def should_upload
+  def conan_upload_flag
   if (conan_pkg_channel == "stable" && env.BRANCH_NAME != "master") {
-    conan_upload_flag = "--no-overwrite"
+    should_upload = false
   } else {
-    conan_upload_flag = ""
+    should_upload = true
+    if (conan_pkg_channel == "stable") {
+      conan_upload_flag = "--no-overwrite"
+    } else {
+      conan_upload_flag = ""
+    }
   }
 
   return {
@@ -95,13 +102,15 @@ def get_macos_pipeline() {
           ).trim()
         }  // stage
 
-        stage("macOS: Upload") {
-          sh "conan upload \
-            --all \
-            ${conan_upload_flag} \
-            --remote ${conan_remote} \
-            ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
-        }  // stage
+        if (should_upload) {
+          stage("macOS: Upload") {
+            sh "conan upload \
+              --all \
+              ${conan_upload_flag} \
+              --remote ${conan_remote} \
+              ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
+          }  // stage
+        }
       }  // dir
     }  // node
   }  // return
