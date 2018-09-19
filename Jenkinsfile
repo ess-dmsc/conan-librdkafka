@@ -17,7 +17,7 @@ containerBuildNodes = [
 packageBuilder = new ConanPackageBuilder(this, containerBuildNodes, conan_pkg_channel)
 
 builders = packageBuilder.createPackageBuilders { container ->
-  packageBuilder.build(container, [
+  packageBuilder.addConfiguration(container, [
     'settings': [
       'librdkafka:build_type': 'Release'
     ],
@@ -26,7 +26,7 @@ builders = packageBuilder.createPackageBuilders { container ->
     ]
   ])
 
-  packageBuilder.build(container, [
+  packageBuilder.addConfiguration(container, [
     'settings': [
       'librdkafka:build_type': 'Release'
     ],
