@@ -20,7 +20,7 @@ packageBuilder.defineRemoteUploadNode('centos')
 builders = packageBuilder.createPackageBuilders { container ->
   packageBuilder.addConfiguration(container, [
     'settings': [
-      'librdkafka:build_type': 'Release'
+      'librdkafka:build_type': 'Debug'
     ],
     'options': [
       'librdkafka:shared': 'False'
@@ -28,13 +28,12 @@ builders = packageBuilder.createPackageBuilders { container ->
   ])
 
   packageBuilder.addConfiguration(container, [
-    'settings': [
-      'librdkafka:build_type': 'Release'
-    ],
     'options': [
       'librdkafka:shared': 'True'
     ]
   ])
+
+  packageBuilder.addConfiguration(container)
 }
 
 node {
