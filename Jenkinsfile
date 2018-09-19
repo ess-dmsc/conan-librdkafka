@@ -48,6 +48,13 @@ node {
 }
 
 def get_macos_pipeline() {
+  String conan_upload_flag
+  if (conan_pkg_channel == "stable" && env.BRANCH_NAME != "master") {
+    conan_upload_flag = "--no-overwrite"
+  } else {
+    conan_upload_flag = ""
+  }
+
   return {
     node('macos') {
       cleanWs()
