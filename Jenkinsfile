@@ -6,7 +6,7 @@ project = "conan-librdkafka"
 
 conan_remote = "ess-dmsc-local"
 conan_user = "ess-dmsc"
-conan_pkg_channel = "testing"
+conan_pkg_channel = "stable"
 
 containerBuildNodes = [
   'centos': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
@@ -110,7 +110,9 @@ def get_macos_pipeline() {
               --remote ${conan_remote} \
               ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
           }  // stage
-        }
+        } else {
+          echo "Skipping upload"
+        }  // else
       }  // dir
     }  // node
   }  // return
