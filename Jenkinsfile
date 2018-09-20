@@ -15,8 +15,7 @@ containerBuildNodes = [
 ]
 
 packageBuilder = new ConanPackageBuilder(this, containerBuildNodes, conan_pkg_channel)
-packageBuilder.skipUpload()
-// packageBuilder.defineRemoteUploadNode('centos')
+packageBuilder.defineRemoteUploadNode('centos')
 
 builders = packageBuilder.createPackageBuilders { container ->
   packageBuilder.addConfiguration(container, [
