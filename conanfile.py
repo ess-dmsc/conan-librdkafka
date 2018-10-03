@@ -7,7 +7,7 @@ class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
     sha256 = "9d8f1eb7b0e29e9ab1168347c939cb7ae5dff00a39cef99e7ef033fd8f92737c"
 
-    src_version = "0.11.4"
+    src_version = "0.11.5"
     version = src_version
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
