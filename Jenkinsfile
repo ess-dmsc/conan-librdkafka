@@ -2,21 +2,21 @@ project = "conan-librdkafka"
 
 conan_remote = "ess-dmsc-local"
 conan_user = "ess-dmsc"
-conan_pkg_channel = "testing"
+conan_pkg_channel = "stable"
 
 remote_upload_node = "centos7"
 
 images = [
   'centos7': [
-    'name': 'essdmscdm/centos7-build-node:3.0.0',
+    'name': 'essdmscdm/centos7-build-node:3.2.0',
     'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash -e'
   ],
   'debian9': [
-    'name': 'essdmscdm/debian9-build-node:2.0.0',
+    'name': 'essdmscdm/debian9-build-node:2.3.0',
     'sh': 'bash -e'
   ],
   'ubuntu1804': [
-    'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
+    'name': 'essdmscdm/ubuntu18.04-build-node:1.2.0',
     'sh': 'bash -e'
   ]
 ]
