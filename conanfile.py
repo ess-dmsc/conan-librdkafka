@@ -74,7 +74,7 @@ class LibrdkafkaConan(ConanFile):
             if self.options.shared:
                 ldflags = os.environ.get("LDFLAGS", "")
                 if tools.os_info.is_linux:
-                    os.environ["LDFLAGS"] = ldflags + " -Wl,-rpath=\$$ORIGIN"
+                    os.environ["LDFLAGS"] = ldflags + " -Wl,-rpath=\\$$ORIGIN"
                 elif tools.os_info.is_macos:
                     os.environ["LDFLAGS"] = ldflags + " -headerpad_max_install_names"
             else:
@@ -115,7 +115,7 @@ class LibrdkafkaConan(ConanFile):
             self.copy("*.h", src=install_folder)
             if self.options.shared:
                 if tools.os_info.is_linux:
-                    self.copy("*.so*", src=install_folder)
+                    self.copy("*.so*", src=install_folder, symlinks=True)
                 elif tools.os_info.is_macos:
                     self.copy("*.dylib*", src=install_folder)
             else:
