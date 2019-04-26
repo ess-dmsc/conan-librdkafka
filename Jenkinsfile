@@ -101,18 +101,6 @@ def get_macos_pipeline() {
             returnStdout: true
           ).trim()
         }  // stage
-
-        if (should_upload) {
-          stage("macOS: Upload") {
-            sh "conan upload \
-              --all \
-              ${conan_upload_flag} \
-              --remote ${conan_remote} \
-              ${pkg_name_and_version}@${conan_user}/${conan_pkg_channel}"
-          }  // stage
-        } else {
-          echo "Skipping upload"
-        }  // else
       }  // dir
     }  // node
   }  // return
