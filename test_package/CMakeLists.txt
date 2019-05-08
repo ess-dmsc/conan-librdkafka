@@ -2,7 +2,7 @@ project(PackageTest CXX)
 cmake_minimum_required(VERSION 2.8.12)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(SKIP_RPATH)
+conan_basic_setup(KEEP_RPATHS)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 find_package(LibRDKafka)
