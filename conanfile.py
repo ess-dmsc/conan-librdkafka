@@ -5,15 +5,14 @@ from conans.util import files
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    sha256 = "cc6ebbcd0a826eec1b8ce1f625ffe71b53ef3290f8192b6cae38412a958f4fd3"
+    sha256 = "9d8f1eb7b0e29e9ab1168347c939cb7ae5dff00a39cef99e7ef033fd8f92737c"
 
-    src_version = "0.11.5"
-    version = src_version + "-dm1"
+    src_version = "0.11.4"
+    version = src_version + "-dm2"
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
     description = "The Apache Kafka C/C++ library"
     settings = "os", "compiler", "build_type", "arch"
-    build_requires = "cmake_installer/3.10.0@conan/stable"
     options = {"shared": [True, False]}
     default_options = "shared=False"
     exports = "files/*"
