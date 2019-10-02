@@ -5,9 +5,9 @@ from conans.util import files
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    sha256 = "123b47404c16bcde194b4bd1221c21fdce832ad12912bd8074f88f64b2b86f2b"
+    sha256 = "eedde1c96104e4ac2d22a4230e34f35dd60d53976ae2563e3dd7c27190a96859"
 
-    src_version = "1.1.0"
+    src_version = "1.2.0"
     version = src_version + ""
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
@@ -59,7 +59,7 @@ class LibrdkafkaConan(ConanFile):
 
                 # Enables overridding of default window build settings
                 cmake.definitions["WITHOUT_WIN32_CONFIG"] = "ON"
-				
+
                 # Some symbols we use for mocks don't get exported unless we use this
                 cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "TRUE"
 
