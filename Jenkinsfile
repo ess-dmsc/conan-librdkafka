@@ -49,19 +49,6 @@ node {
 }
 
 def get_macos_pipeline() {
-  def should_upload
-  def conan_upload_flag
-  if (conan_pkg_channel == "stable" && env.BRANCH_NAME != "master") {
-    should_upload = false
-  } else {
-    should_upload = true
-    if (conan_pkg_channel == "stable") {
-      conan_upload_flag = "--no-overwrite"
-    } else {
-      conan_upload_flag = ""
-    }
-  }
-
   return {
     node('macos') {
       cleanWs()
@@ -95,11 +82,6 @@ def get_macos_pipeline() {
             --settings librdkafka:build_type=Release \
             --options librdkafka:shared=True \
             --build=outdated"
-
-          pkg_name_and_version = sh(
-            script: "./get_conan_pkg_name_and_version.sh",
-            returnStdout: true
-          ).trim()
         }  // stage
       }  // dir
     }  // node
