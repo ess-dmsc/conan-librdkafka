@@ -5,9 +5,9 @@ from conans.util import files
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    sha256 = "eedde1c96104e4ac2d22a4230e34f35dd60d53976ae2563e3dd7c27190a96859"
+    sha256 = "0984ffbe17b9e04599fb9eceb16cfa189f525a042bef02474cd1bbfe1ea68416"
 
-    src_version = "1.2.0"
+    src_version = "1.4.4"
     version = src_version + ""
     license = "BSD 2-Clause"
     url = "https://github.com/ess-dmsc/conan-librdkafka"
